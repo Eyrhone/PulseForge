@@ -909,7 +909,7 @@
       `;
     }
 
-    const LOG_STORAGE_KEY = 'pulseforge.logs.v1';
+    const LOG_STORAGE_KEY = 'edhaynfit.logs.v1';
 
     function loadAll() {
       try {
@@ -994,9 +994,9 @@
 
     // Paste your Google OAuth Client ID below (from console.cloud.google.com → Credentials)
     const GOOGLE_CLIENT_ID = '56024273122-5jpnhuje2im0317qfh01qvm02t1e1dcd.apps.googleusercontent.com';
-    const DRIVE_FILE_NAME = 'pulseforge-backup.json';
+    const DRIVE_FILE_NAME = 'edhaynfit-backup.json';
     const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
-    const DRIVE_STORAGE_KEY = 'pulseforge.drive.v1';
+    const DRIVE_STORAGE_KEY = 'edhaynfit.drive.v1';
 
     let tokenClient = null;
     let accessToken = null;
@@ -1074,7 +1074,7 @@
     }
 
     async function createDriveFile(name, content) {
-      const boundary = '----pulseforge' + Math.random().toString(36).slice(2);
+      const boundary = '----edhaynfit' + Math.random().toString(36).slice(2);
       const metadata = { name, mimeType: 'application/json' };
       const body =
         `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n` +
