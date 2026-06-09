@@ -1,0 +1,1997 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Générateur de programme d'entraînement</title>
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root, [data-theme="light"] {
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem;
+      --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9; --color-surface-offset: #f3f0ec;
+      --color-border: #d4d1ca; --color-divider: #dcd9d5; --color-text: #28251d; --color-text-muted: #66655f; --color-text-faint: #94928c;
+      --color-text-inverse: #f9f8f4; --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #d7e9e8;
+      --color-success: #437a22; --color-warning: #964219; --shadow-sm: 0 1px 2px rgba(40, 37, 29, 0.06); --shadow-md: 0 8px 24px rgba(40, 37, 29, 0.08);
+      --radius-sm: 0.5rem; --radius-md: 0.75rem; --radius-lg: 1rem; --radius-xl: 1.25rem; --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      --font-body: 'Satoshi', 'Inter', sans-serif; --font-display: 'Satoshi', 'Inter', sans-serif;
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d; --color-surface-offset: #252320; --color-border: #393836;
+      --color-divider: #2b2a28; --color-text: #ece9e2; --color-text-muted: #b5b1a8; --color-text-faint: #87837c; --color-text-inverse: #171614;
+      --color-primary: #4f98a3; --color-primary-hover: #6ab4bf; --color-primary-highlight: rgba(79,152,163,0.18); --color-success: #7fbb5a; --color-warning: #d08a63;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.25); --shadow-md: 0 10px 30px rgba(0,0,0,0.32);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); line-height: 1.55; background: radial-gradient(circle at top right, var(--color-primary-highlight), transparent 28%), var(--color-bg); color: var(--color-text); }
+    button, input, select { font: inherit; }
+    h1, h2, h3, h4, p { margin: 0; }
+    .app { max-width: 1240px; margin: 0 auto; padding: var(--space-6); display: grid; grid-template-columns: 380px 1fr; gap: var(--space-6); }
+    .panel, .card { background: color-mix(in srgb, var(--color-surface) 88%, white 12%); border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm); }
+    .panel { position: sticky; top: var(--space-6); padding: var(--space-6); align-self: start; }
+    .brand { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-6); gap: var(--space-4); }
+    .logo-wrap { display:flex; align-items:center; gap: var(--space-3); }
+    .logo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--color-primary-highlight); color: var(--color-primary); flex: 0 0 auto; }
+    .title { font-size: var(--text-xl); font-weight: 900; letter-spacing: -0.03em; }
+    .subtitle { color: var(--color-text-muted); font-size: var(--text-sm); margin-top: var(--space-2); }
+    .theme-toggle { min-width: 44px; min-height: 44px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); background: var(--color-surface-2); color: var(--color-text); display:grid; place-items:center; transition: transform var(--transition-interactive), background var(--transition-interactive); }
+    .theme-toggle:hover, .btn:hover { transform: translateY(-1px); }
+    .form-grid { display: grid; gap: var(--space-5); }
+    .field { display:grid; gap: var(--space-2); }
+    .field label { font-size: var(--text-sm); font-weight: 700; }
+    .hint { font-size: var(--text-xs); color: var(--color-text-muted); }
+    select, input[type="text"] { width: 100%; min-height: 48px; padding: 0 var(--space-4); border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); background: var(--color-surface-2); color: var(--color-text); outline: none; }
+    select:focus, input[type="text"]:focus { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+    .actions { display:grid; gap: var(--space-3); margin-top: var(--space-2); }
+    .btn { min-height: 48px; border-radius: 999px; padding: 0 var(--space-5); border: 0; display:inline-flex; align-items:center; justify-content:center; gap: var(--space-2); cursor:pointer; transition: transform var(--transition-interactive), background var(--transition-interactive), opacity var(--transition-interactive); }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); font-weight: 700; }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface-offset); color: var(--color-text); border: 1px solid color-mix(in srgb, var(--color-text) 12%, transparent); }
+    .summary-strip { display:grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-4); margin-bottom: var(--space-6); }
+    .exercise-badge {
+      display: inline-block;
+      min-height: 24px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      background: var(--color-primary-highlight);
+      color: var(--color-primary);
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .exercise-grid { display:grid; gap: var(--space-4); }
+    .exercise-card { padding: var(--space-4); background: var(--color-surface-2); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); border-radius: var(--radius-lg); }
+    .exercise-top { display:flex; justify-content:space-between; gap: var(--space-3); align-items:flex-start; margin-bottom: var(--space-3); }
+    .exercise-links { display:flex; flex-wrap:wrap; gap: var(--space-2); margin-top: var(--space-3); }
+    .exercise-link { display:inline-flex; align-items:center; min-height:36px; padding:0 12px; border-radius:999px; text-decoration:none; background:var(--color-primary-highlight); color:var(--color-primary); font-size:var(--text-xs); font-weight:700; }
+    .exercise-media { display:grid; grid-template-columns: 160px 1fr; gap: var(--space-4); margin-top: var(--space-3); align-items:start; }
+    .exercise-media img { width:160px; height:120px; object-fit:cover; border-radius: var(--radius-md); border:1px solid color-mix(in srgb, var(--color-text) 10%, transparent); background:var(--color-surface-offset); }
+    .exercise-desc { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .section-subtitle { color: var(--color-text-muted); font-size: var(--text-sm); margin-top: var(--space-2); }
+    .metric, .hero, .day-card, .progression, .notes { padding: var(--space-5); }
+    .metric .kicker { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--color-text-muted); margin-bottom: var(--space-2); }
+    .metric .value { font-size: var(--text-lg); font-weight: 900; }
+    .metric .mini, .hero p { margin-top: var(--space-2); color: var(--color-text-muted); font-size: var(--text-sm); }
+    .content, .program, .timeline, .note-list { display:grid; gap: var(--space-6); }
+    .day-head { display:flex; align-items:flex-start; justify-content:space-between; gap: var(--space-4); margin-bottom: var(--space-4); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-divider); }
+    .day-title { font-size: var(--text-lg); font-weight: 900; }
+    .day-type { color: var(--color-text-muted); font-size: var(--text-sm); margin-top: var(--space-1); }
+    .badge, .week-pill { display:inline-flex; align-items:center; justify-content:center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: 999px; font-size: var(--text-xs); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; background: var(--color-primary-highlight); color: var(--color-primary); }
+    .exercise-table { width:100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .exercise-table th, .exercise-table td { text-align:left; padding: 12px 10px; vertical-align: top; border-bottom: 1px solid var(--color-divider); }
+    .exercise-table th { color: var(--color-text-muted); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .06em; }
+    .exercise-table td strong { display:block; margin-bottom: 4px; }
+    .step { display:grid; grid-template-columns: 88px 1fr; gap: var(--space-4); align-items:start; padding: var(--space-4); background: var(--color-surface-2); border-radius: var(--radius-lg); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
+    .chip-row { display:flex; flex-wrap:wrap; gap: var(--space-2); margin-top: var(--space-4); }
+    .chip { padding: 8px 12px; border-radius: 999px; background: var(--color-surface-offset); font-size: var(--text-xs); color: var(--color-text-muted); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
+    .footer-note { font-size: var(--text-xs); color: var(--color-text-faint); }
+    .inline-note { margin-top: var(--space-2); padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-offset); color: var(--color-text-muted); font-size: var(--text-xs); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
+    .hidden { display: none; }
+    .exercise-toggle { border: 0; background: var(--color-surface-offset); cursor: pointer; font-size: var(--text-xs); padding: 4px 10px; border-radius: 999px; color: var(--color-primary); font-weight: 700; margin-right: 8px; vertical-align: middle; transition: background var(--transition-interactive); }
+    .exercise-toggle:hover { background: var(--color-primary-highlight); }
+    .exercise-detail-row td { background: color-mix(in srgb, var(--color-primary-highlight) 40%, var(--color-surface-2)); padding: var(--space-4) !important; border-top: 0 !important; }
+    .inline-detail { display: grid; grid-template-columns: 1fr 200px; gap: var(--space-4); align-items: start; }
+    .inline-detail img { width: 200px; height: 150px; object-fit: cover; border-radius: var(--radius-md); border: 1px solid var(--color-divider); }
+    .inline-detail-muscles { font-size: var(--text-sm); margin-bottom: var(--space-2); }
+    .inline-detail-desc { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.6; }
+    .inline-detail .exercise-links { margin-top: var(--space-3); }
+    @media (max-width: 720px) {
+      .inline-detail { grid-template-columns: 1fr; }
+      .inline-detail img { width: 100%; max-width: 260px; height: auto; }
+    }
+    @media print {
+      .exercise-detail-row.hidden { display: table-row !important; }
+      .exercise-toggle { display: none; }
+    }
+    .backup-bar { padding: var(--space-4) var(--space-5); display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .backup-status { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); flex: 1; min-width: 240px; }
+    .backup-icon { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--color-surface-offset); color: var(--color-text-muted); flex: 0 0 auto; font-size: var(--text-base); }
+    .backup-icon.ok { background: color-mix(in srgb, var(--color-success) 18%, transparent); color: var(--color-success); }
+    .backup-icon.warn { background: color-mix(in srgb, var(--color-warning) 18%, transparent); color: var(--color-warning); }
+    .backup-text { display: grid; gap: 2px; }
+    .backup-text strong { font-weight: 700; }
+    .backup-text small { color: var(--color-text-muted); font-size: var(--text-xs); }
+    .backup-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .btn-small { min-height: 36px; padding: 0 var(--space-4); border-radius: 999px; border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); background: var(--color-surface); color: var(--color-text); font-size: var(--text-xs); font-weight: 700; cursor: pointer; }
+    .btn-small.primary { background: var(--color-primary); color: var(--color-text-inverse); border-color: var(--color-primary); }
+    .btn-small.primary:hover { background: var(--color-primary-hover); }
+    .btn-small:hover { transform: translateY(-1px); }
+    .tracking { padding: var(--space-5); }
+    .tracking details { border: 1px solid var(--color-divider); border-radius: var(--radius-md); margin-top: var(--space-3); background: var(--color-surface-2); }
+    .tracking details[open] { box-shadow: var(--shadow-sm); }
+    .tracking summary { cursor: pointer; padding: var(--space-3) var(--space-4); font-weight: 700; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); }
+    .tracking summary::-webkit-details-marker { display: none; }
+    .tracking summary::after { content: '+'; font-size: var(--text-lg); color: var(--color-text-muted); transition: transform var(--transition-interactive); }
+    .tracking details[open] summary::after { content: '−'; }
+    .tracking-body { padding: 0 var(--space-4) var(--space-4); display: grid; gap: var(--space-4); }
+    .log-form { display: grid; grid-template-columns: 1.4fr 0.6fr 1fr 0.7fr 0.6fr auto; gap: var(--space-2); align-items: end; padding: var(--space-3); background: var(--color-surface-offset); border-radius: var(--radius-md); border: 1px solid color-mix(in srgb, var(--color-text) 10%, transparent); }
+    .log-form .field-mini { display: grid; gap: 4px; }
+    .log-form label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+    .log-form input { min-height: 38px; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); background: var(--color-surface); color: var(--color-text); width: 100%; outline: none; }
+    .log-form input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+    .log-form .btn-log { min-height: 38px; padding: 0 var(--space-3); border-radius: 999px; border: 0; background: var(--color-primary); color: var(--color-text-inverse); font-weight: 700; cursor: pointer; }
+    .log-form .btn-log:hover { background: var(--color-primary-hover); }
+    .log-history { display: grid; gap: var(--space-2); }
+    .log-history-empty { font-size: var(--text-sm); color: var(--color-text-faint); font-style: italic; }
+    .log-entry { display: grid; grid-template-columns: 90px 1fr auto; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: var(--color-surface); border-radius: var(--radius-sm); border: 1px solid var(--color-divider); align-items: center; font-size: var(--text-sm); }
+    .log-entry .log-date { font-weight: 700; color: var(--color-text-muted); font-size: var(--text-xs); }
+    .log-entry .log-stats { color: var(--color-text); }
+    .log-entry .log-stats .rpe { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--color-primary-highlight); color: var(--color-primary); font-weight: 700; font-size: var(--text-xs); margin-left: 6px; }
+    .log-entry .log-stats .note { display: block; color: var(--color-text-muted); font-size: var(--text-xs); margin-top: 2px; }
+    .log-entry .btn-del { border: 0; background: transparent; color: var(--color-text-faint); cursor: pointer; font-size: var(--text-lg); padding: 0 var(--space-2); min-height: 32px; }
+    .log-entry .btn-del:hover { color: var(--color-warning); }
+    .pr-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-left: 6px; background: color-mix(in srgb, var(--color-success) 22%, transparent); color: var(--color-success); vertical-align: middle; }
+    .plateau-badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-left: 6px; background: color-mix(in srgb, var(--color-warning) 22%, transparent); color: var(--color-warning); vertical-align: middle; }
+    .suggestion-panel { display: grid; grid-template-columns: 32px 1fr auto; gap: var(--space-3); align-items: center; padding: var(--space-3); background: color-mix(in srgb, var(--color-primary-highlight) 60%, var(--color-surface)); border: 1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-divider)); border-radius: var(--radius-md); margin-bottom: var(--space-2); }
+    .suggestion-panel.deload { background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-warning) 35%, var(--color-divider)); }
+    .suggestion-icon { font-size: var(--text-lg); text-align: center; }
+    .suggestion-body { display: grid; gap: 2px; min-width: 0; }
+    .suggestion-body strong { font-size: var(--text-sm); }
+    .suggestion-body small { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.4; }
+    .suggestion-apply { min-height: 36px; padding: 0 var(--space-4); border-radius: 999px; border: 0; background: var(--color-primary); color: var(--color-text-inverse); font-weight: 700; cursor: pointer; font-size: var(--text-xs); white-space: nowrap; }
+    .suggestion-apply:hover { background: var(--color-primary-hover); }
+    @media (max-width: 720px) {
+      .suggestion-panel { grid-template-columns: 32px 1fr; }
+      .suggestion-apply { grid-column: 1 / -1; }
+    }
+    .rest-timer { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3); background: color-mix(in srgb, var(--color-primary) 92%, white 8%); color: var(--color-text-inverse); border-radius: var(--radius-md); margin: var(--space-2) 0; font-weight: 700; }
+    .rest-timer.done { background: color-mix(in srgb, var(--color-success) 92%, white 8%); animation: timer-pulse 0.5s ease-out 3; }
+    @keyframes timer-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    .rest-timer .timer-display { font-size: var(--text-lg); font-variant-numeric: tabular-nums; flex: 1; }
+    .rest-timer .timer-label { font-size: var(--text-xs); opacity: 0.85; font-weight: 500; }
+    .rest-timer button { border: 0; background: rgba(255,255,255,0.2); color: var(--color-text-inverse); min-width: 36px; min-height: 36px; border-radius: 999px; cursor: pointer; font-size: var(--text-base); padding: 0 var(--space-3); }
+    .rest-timer button:hover { background: rgba(255,255,255,0.35); }
+    .session-notes { padding: var(--space-3); background: color-mix(in srgb, var(--color-warning) 8%, var(--color-surface-2)); border: 1px solid color-mix(in srgb, var(--color-warning) 30%, var(--color-divider)); border-radius: var(--radius-md); margin-bottom: var(--space-3); }
+    .session-notes-title { font-size: var(--text-xs); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); margin-bottom: var(--space-2); }
+    .session-notes-form { display: grid; grid-template-columns: 130px 1fr auto; gap: var(--space-2); align-items: stretch; }
+    .session-notes-form input[type="date"], .session-notes-form input[type="text"] { min-height: 38px; padding: 0 var(--space-3); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--color-text) 14%, transparent); background: var(--color-surface); color: var(--color-text); outline: none; font-family: inherit; font-size: var(--text-sm); }
+    .session-notes-form input:focus { border-color: var(--color-primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+    .session-notes-form button { min-height: 38px; padding: 0 var(--space-4); border-radius: 999px; border: 0; background: var(--color-primary); color: var(--color-text-inverse); font-weight: 700; cursor: pointer; font-size: var(--text-xs); }
+    .session-notes-form button:hover { background: var(--color-primary-hover); }
+    .session-notes-list { margin-top: var(--space-2); display: grid; gap: 6px; }
+    .session-note-entry { display: grid; grid-template-columns: 100px 1fr auto; gap: var(--space-2); align-items: center; padding: 6px 10px; background: var(--color-surface); border-radius: var(--radius-sm); border: 1px solid var(--color-divider); font-size: var(--text-sm); }
+    .session-note-entry .note-date { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 700; }
+    .session-note-entry .note-text { color: var(--color-text); }
+    .session-note-entry .btn-del { border: 0; background: transparent; color: var(--color-text-faint); cursor: pointer; font-size: var(--text-lg); padding: 0 var(--space-2); }
+    .session-note-entry .btn-del:hover { color: var(--color-warning); }
+    .cycle-banner { padding: var(--space-4) var(--space-5); display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+    .cycle-banner.deload { background: color-mix(in srgb, var(--color-warning) 14%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-warning) 35%, var(--color-border)); }
+    .cycle-info { display: grid; gap: var(--space-1); flex: 1; min-width: 200px; }
+    .cycle-info strong { font-size: var(--text-base); }
+    .cycle-info small { color: var(--color-text-muted); font-size: var(--text-xs); }
+    .cycle-progress { flex: 1; min-width: 200px; height: 10px; background: var(--color-surface-offset); border-radius: 999px; overflow: hidden; position: relative; border: 1px solid var(--color-divider); }
+    .cycle-progress-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 60%, var(--color-success))); border-radius: 999px; transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .cycle-progress-fill.deload { background: var(--color-warning); }
+    .cycle-deload-alert { font-size: var(--text-sm); padding: var(--space-2) var(--space-3); background: color-mix(in srgb, var(--color-warning) 18%, transparent); color: var(--color-warning); border-radius: var(--radius-sm); margin-top: var(--space-2); font-weight: 700; }
+    @media (max-width: 720px) {
+      .session-notes-form { grid-template-columns: 1fr; }
+      .session-note-entry { grid-template-columns: 1fr auto; }
+      .session-note-entry .note-date { grid-column: 1 / -1; }
+    }
+    .mini-chart { padding: var(--space-3); background: color-mix(in srgb, var(--color-primary-highlight) 35%, var(--color-surface-2)); border: 1px solid var(--color-divider); border-radius: var(--radius-md); margin: var(--space-3) 0; }
+    .mini-chart-head { display: flex; justify-content: space-between; align-items: baseline; font-size: var(--text-xs); margin-bottom: 6px; }
+    .mini-chart-head .label { font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: .05em; }
+    .mini-chart-head .trend { font-weight: 700; color: var(--color-success); }
+    .mini-chart-head .trend.down { color: var(--color-warning); }
+    .mini-chart-head .trend.flat { color: var(--color-text-faint); }
+    .mini-chart svg { display: block; width: 100%; height: 50px; }
+    .mini-chart svg .line { fill: none; stroke: var(--color-primary); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+    .mini-chart svg .dot { fill: var(--color-primary); }
+    .mini-chart svg .dot.pr { fill: var(--color-success); stroke: var(--color-surface); stroke-width: 1.5; }
+    .tracking-exo { padding: var(--space-3); background: var(--color-surface); border-radius: var(--radius-md); border: 1px solid var(--color-divider); }
+    .tracking-exo-name { font-weight: 700; margin-bottom: var(--space-3); display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+    .tracking-exo-name .prescription { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; }
+    @media (max-width: 720px) {
+      .log-form { grid-template-columns: 1fr 1fr; }
+      .log-form .btn-log { grid-column: 1 / -1; }
+      .log-entry { grid-template-columns: 1fr auto; }
+      .log-entry .log-date { grid-column: 1 / -1; }
+    }
+    @media (max-width: 1080px) { .app { grid-template-columns: 1fr; } .panel { position: static; } .summary-strip { grid-template-columns: repeat(2, 1fr); } .step { grid-template-columns: 1fr; } }
+    @media (max-width: 720px) {
+      body { font-size: 16px; }
+      .app { padding: var(--space-4); gap: var(--space-4); }
+      .panel, .hero, .metric, .day-card, .progression, .notes { padding: var(--space-4); }
+      .summary-strip { grid-template-columns: 1fr; }
+      .exercise-media { grid-template-columns: 1fr; }
+      .exercise-media img { width:100%; height:auto; max-width:260px; }
+      .day-head { flex-direction: column; }
+      .exercise-table, .exercise-table thead, .exercise-table tbody, .exercise-table th, .exercise-table td, .exercise-table tr { display: block; }
+      .exercise-table thead { display:none; }
+      .exercise-table tr { padding: 10px 0; border-bottom: 1px solid var(--color-divider); }
+      .exercise-table td { border: 0; padding: 6px 0; }
+      .exercise-table td::before { content: attr(data-label); display:block; font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .05em; color: var(--color-text-muted); margin-bottom: 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <aside class="panel">
+      <div class="brand">
+        <div class="logo-wrap">
+          <div class="logo" aria-hidden="true">
+            <svg viewBox="0 0 48 48" width="26" height="26" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-label="Logo Pulse Forge">
+              <path d="M10 30 18 18l6 10 6-16 8 18" />
+              <path d="M9 36h30" />
+            </svg>
+          </div>
+          <div>
+            <div style="font-weight:900; letter-spacing:-.03em;">Pulse Forge</div>
+            <div class="hint">Programme sur mesure en 8 semaines</div>
+          </div>
+        </div>
+        <button class="theme-toggle" type="button" data-theme-toggle aria-label="Basculer le thème">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <h1 class="title">Générateur d'entraînement</h1>
+          <p class="subtitle">Indique tes disponibilités, ton matériel, tes kettlebells accessibles et ton niveau pour obtenir un planning hebdomadaire détaillé avec progression intégrée sur 8 semaines.</p>
+        </div>
+
+        <div class="field">
+          <label for="days">Jours disponibles par semaine</label>
+          <select id="days">
+            <option value="2">2 jours</option>
+            <option value="3" selected>3 jours</option>
+            <option value="4">4 jours</option>
+            <option value="5">5 jours</option>
+            <option value="6">6 jours</option>
+          </select>
+          <div class="hint">Le générateur équilibre volume, récupération et fréquence.</div>
+        </div>
+
+        <div class="field">
+          <label for="equipment">Matériel principal</label>
+          <select id="equipment">
+            <option value="gym">Salle complète</option>
+            <option value="dumbbells">Haltères à la maison</option>
+            <option value="kettlebell">Kettlebell(s)</option>
+            <option value="bodyweight">Poids du corps</option>
+          </select>
+          <div class="hint">Le choix filtre automatiquement les exercices proposés.</div>
+        </div>
+
+        <div class="field" id="weightField">
+          <label for="availableWeights">Kettlebells disponibles</label>
+          <select id="availableWeights">
+            <option value="none">À préciser</option>
+            <option value="one">Une seule kettlebell</option>
+            <option value="multiple">Plusieurs kettlebells</option>
+          </select>
+          <div class="hint" id="weightHint">Indique si tu as une ou plusieurs kettlebells pour adapter le discours de progression.</div>
+          <div class="inline-note hidden" id="weightNote"></div>
+          <div class="field hidden" id="kbListField" style="margin-top:12px;">
+            <label for="kbList">Lister les poids disponibles</label>
+            <input type="text" id="kbList" placeholder="Ex: 8 kg, 12 kg, 16 kg">
+            <div class="hint">Exemple: 12 kg seul, ou 8 kg / 12 kg / 16 kg si tu en as plusieurs.</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="level">Niveau actuel</label>
+          <select id="level">
+            <option value="beginner">Débutant</option>
+            <option value="intermediate" selected>Intermédiaire</option>
+            <option value="advanced">Avancé</option>
+          </select>
+          <div class="hint">Le niveau ajuste le volume, la difficulté et les rep ranges.</div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary" id="generateBtn" type="button">Générer mon planning</button>
+          <button class="btn btn-secondary" id="printBtn" type="button">Imprimer / exporter en PDF</button>
+        </div>
+
+        <div class="chip-row">
+          <span class="chip">8 semaines</span>
+          <span class="chip">Surcharge progressive</span>
+          <span class="chip">Repos inclus</span>
+          <span class="chip">Kettlebell intégré</span>
+        </div>
+
+        <p class="footer-note">Conseil: garde 1 à 3 répétitions en réserve sur la majorité des séries hors semaine de deload.</p>
+      </div>
+    </aside>
+
+    <section class="content">
+      <section class="card hero">
+        <h2 class="title" style="font-size:var(--text-xl);">Planning généré</h2>
+        <p id="heroText">Sélectionne tes paramètres puis lance la génération pour afficher un programme prêt à suivre sur huit semaines.</p>
+      </section>
+
+      <section class="summary-strip" id="summary"></section>
+      <section class="card cycle-banner hidden" id="cycleBanner"></section>
+      <section class="program" id="program"></section>
+      <section class="card progression" id="progression"></section>
+      <section class="card notes" id="notes"></section>
+      <section class="card backup-bar" id="backupBar"></section>
+      <section class="card tracking" id="tracking"></section>
+      <input type="file" id="importFileInput" accept="application/json" class="hidden">
+    </section>
+  </main>
+
+  <script>
+    const state = { days: 3, equipment: 'gym', level: 'intermediate', availableWeights: '16' };
+
+    const daysEl = document.getElementById('days');
+    const equipmentEl = document.getElementById('equipment');
+    const levelEl = document.getElementById('level');
+    const availableWeightsEl = document.getElementById('availableWeights');
+    const kbListField = document.getElementById('kbListField');
+    const kbListEl = document.getElementById('kbList');
+    const summaryEl = document.getElementById('summary');
+    const programEl = document.getElementById('program');
+    const progressionEl = document.getElementById('progression');
+    const notesEl = document.getElementById('notes');
+    const trackingEl = document.getElementById('tracking');
+    const cycleBannerEl = document.getElementById('cycleBanner');
+    const backupBarEl = document.getElementById('backupBar');
+    const importFileInputEl = document.getElementById('importFileInput');
+    const heroTextEl = document.getElementById('heroText');
+    const weightHintEl = document.getElementById('weightHint');
+    const weightNoteEl = document.getElementById('weightNote');
+
+    const equipmentLabels = { gym: 'Salle complète', dumbbells: 'Haltères à la maison', kettlebell: 'Kettlebell(s)', bodyweight: 'Poids du corps' };
+
+    const templates = {
+      gym: {
+        exercises: {
+          squat: ['Back squat', 'Presse à cuisses', 'Front squat', 'Fentes marchées'], hinge: ['Soulevé de terre roumain', 'Hip thrust barre', 'Leg curl', 'Trap bar deadlift'],
+          horizontalPush: ['Développé couché barre', 'Développé haltères incliné', 'Chest press machine', 'Pompes lestées'], verticalPush: ['Développé militaire', 'Presse épaules machine', 'Arnold press', 'Élévations latérales'],
+          horizontalPull: ['Rowing barre', 'Rowing assis poulie', 'Rowing haltère unilatéral', 'Chest-supported row'], verticalPull: ['Tractions assistées', 'Tirage vertical', 'Pull-over poulie', 'Tractions pronation'],
+          singleLeg: ['Split squat bulgare', 'Step-up haltères', 'Fentes arrière', 'Pistol squat assisté'], core: ['Planche lestée', 'Crunch câble', 'Dead bug', 'Pallof press'],
+          armSuperset: ['Curl barre EZ + extension triceps corde', 'Curl incliné + dips assistés', 'Curl pupitre + extension au-dessus de la tête', 'Curl marteau + pushdown'], conditioning: ['Rameur 8 x 30/90', 'Bike sprint 10 min', 'Sled push', 'Farmer carry']
+        }
+      },
+      dumbbells: {
+        exercises: {
+          squat: ['Goblet squat', 'Squat haltères', 'Fente avant haltères', 'Cyclist squat'], hinge: ['Soulevé de terre roumain haltères', 'Hip thrust haltère', 'Good morning avec haltère', 'Glute bridge unilatéral'],
+          horizontalPush: ['Développé couché au sol', 'Développé haltères incliné', 'Pompes mains sur haltères', 'Floor press neutre'], verticalPush: ['Développé épaules haltères', 'Arnold press', 'Push press haltères', 'Élévations latérales'],
+          horizontalPull: ['Rowing haltère unilatéral', 'Rowing buste penché haltères', 'Rowing poitrine appuyée', 'High row haltères'], verticalPull: ['Pullover haltère', 'Tirage serviette isométrique', 'Shrug haltères contrôlé', 'Y-raise haltères'],
+          singleLeg: ['Split squat bulgare', 'Step-up', 'Fente arrière', 'Soulevé de terre une jambe'], core: ['Dead bug chargé', 'Planche latérale', 'Sit-up haltère', 'Farmer hold'],
+          armSuperset: ['Curl alterné + extension triceps au-dessus de la tête', 'Hammer curl + kickback', 'Curl incliné + JM press haltères', 'Zottman curl + skull crusher haltères'], conditioning: ['Complexe haltères 5 tours', 'Marche du fermier', 'EMOM swing haltère', 'Montées de genoux']
+        }
+      },
+      kettlebell: {
+        exercises: {
+          squat: ['Goblet squat kettlebell', 'Front squat kettlebell', 'Cyclist squat kettlebell', 'Split squat goblet'],
+          hinge: ['Kettlebell swing', 'Soulevé de terre roumain kettlebell', 'Hip hinge explosif', 'Deadlift kettlebell sumo'],
+          horizontalPush: ['Floor press kettlebell', 'Pompes mains sur kettlebells', 'Développé couché au sol unilatéral', 'Pompes tempo'],
+          verticalPush: ['Développé militaire kettlebell', 'Push press kettlebell', 'Half kneeling press', 'Bottom-up press'],
+          horizontalPull: ['Rowing kettlebell unilatéral', 'Rowing kettlebell buste penché', 'High pull kettlebell', 'Renegade row'],
+          verticalPull: ['Pullover kettlebell', 'Halo kettlebell contrôlé', 'Lat prayer isométrique', 'Scap pull avec serviette'],
+          singleLeg: ['Split squat bulgare kettlebell', 'Fente arrière rackée', 'Step-up kettlebell', 'Soulevé de terre une jambe kettlebell'],
+          core: ['Suitcase carry', 'Windmill léger', 'Planche avec drag kettlebell', 'Dead bug kettlebell'],
+          armSuperset: ['Curl kettlebell + extension triceps au-dessus de la tête', 'Curl marteau kettlebell + floor skull crusher', 'Curl bottom-up + close grip push-up', 'Curl alterné + Tate press'],
+          conditioning: ['EMOM swings', 'Complexe kettlebell 6 tours', 'Carries 10 min', 'Circuit clean + squat + press']
+        }
+      },
+      bodyweight: {
+        exercises: {
+          squat: ['Squat tempo', 'Squat sauté contrôlé', 'Wall sit', 'Split squat poids du corps'], hinge: ['Pont fessier une jambe', 'Hip hinge tempo', 'Nordic curl assisté', 'Reverse plank'],
+          horizontalPush: ['Pompes', 'Pompes inclinées', 'Pompes tempo', 'Pompes diamant'], verticalPush: ['Pike push-up', 'Pompes pseudo-planche', 'Handstand hold au mur', 'Élévations scapulaires au mur'],
+          horizontalPull: ['Rowing sous table', 'Tirage serviette porte', 'Snow angels au sol', 'Superman row'], verticalPull: ['Scap pull-up suspendu', 'Iso hold serviette', 'Lat prayer au sol', 'Pulldown serviette isométrique'],
+          singleLeg: ['Fente arrière', 'Split squat bulgare chaise', 'Step-up sur marche', 'Skater squat assisté'], core: ['Planche', 'Hollow hold', 'Dead bug', 'Mountain climber lent'],
+          armSuperset: ['Pompes serrées + bear crawl hold', 'Curl serviette isométrique + extension triceps banc', 'Pompes diamant + pompes excentriques', 'Pseudo-curl serviette + pompes mains serrées'], conditioning: ['Circuit 30/30 x 10', 'Burpees techniques', 'Shadow boxing 12 min', 'Stair intervals']
+        }
+      }
+    };
+
+    const levelConfig = {
+      beginner: { label: 'Débutant', baseSetsMain: 3, baseSetsIso: 2, repMain: '8-10', repSecondary: '10-12', repIso: '12-15', restMain: '90 s', restSecondary: '75 s', restIso: '45-60 s', weeklySetsRange: '8-12 séries / groupe musculaire', guidance: 'Priorité à la technique, à l’amplitude contrôlée et à une montée en charge progressive très simple.' },
+      intermediate: { label: 'Intermédiaire', baseSetsMain: 4, baseSetsIso: 3, repMain: '6-10', repSecondary: '8-12', repIso: '10-15', restMain: '90-120 s', restSecondary: '75-90 s', restIso: '45-60 s', weeklySetsRange: '10-16 séries / groupe musculaire', guidance: 'Travail équilibré entre force et hypertrophie avec progression sur la charge ou les répétitions chaque semaine.' },
+      advanced: { label: 'Avancé', baseSetsMain: 5, baseSetsIso: 3, repMain: '5-8', repSecondary: '8-10', repIso: '10-15', restMain: '120-150 s', restSecondary: '75-105 s', restIso: '45-75 s', weeklySetsRange: '14-20 séries / groupe musculaire', guidance: 'Volume plus élevé, intensité mieux répartie et fin de cycle plus proche de l’échec sans sacrifier la forme.' }
+    };
+
+    const splitMap = { 2: ['fullA', 'fullB'], 3: ['fullA', 'fullB', 'fullC'], 4: ['upperA', 'lowerA', 'upperB', 'lowerB'], 5: ['push', 'pull', 'legs', 'upper', 'lower'], 6: ['push', 'pull', 'legs', 'pushB', 'pullB', 'legsB'] };
+    const sessionBlueprints = {
+      fullA: { name: 'Jour 1', focus: 'Full body dominant squat', badge: 'Force + base', slots: ['squat','horizontalPush','horizontalPull','hinge','core'] },
+      fullB: { name: 'Jour 2', focus: 'Full body dominant charnière', badge: 'Volume', slots: ['hinge','verticalPush','verticalPull','singleLeg','armSuperset'] },
+      fullC: { name: 'Jour 3', focus: 'Full body équilibré', badge: 'Complément', slots: ['squat','horizontalPush','verticalPull','singleLeg','conditioning'] },
+      upperA: { name: 'Jour 1', focus: 'Haut du corps horizontal', badge: 'Upper A', slots: ['horizontalPush','horizontalPull','verticalPush','verticalPull','armSuperset'] },
+      lowerA: { name: 'Jour 2', focus: 'Bas du corps dominant squat', badge: 'Lower A', slots: ['squat','singleLeg','hinge','core','conditioning'] },
+      upperB: { name: 'Jour 3', focus: 'Haut du corps vertical', badge: 'Upper B', slots: ['verticalPush','verticalPull','horizontalPush','horizontalPull','armSuperset'] },
+      lowerB: { name: 'Jour 4', focus: 'Bas du corps dominant charnière', badge: 'Lower B', slots: ['hinge','squat','singleLeg','core','conditioning'] },
+      push: { name: 'Jour 1', focus: 'Push', badge: 'Pectoraux / épaules / triceps', slots: ['horizontalPush','verticalPush','horizontalPush','armSuperset','core'] },
+      pull: { name: 'Jour 2', focus: 'Pull', badge: 'Dos / biceps', slots: ['horizontalPull','verticalPull','horizontalPull','armSuperset','conditioning'] },
+      legs: { name: 'Jour 3', focus: 'Jambes', badge: 'Quadriceps / ischios / fessiers', slots: ['squat','hinge','singleLeg','core','conditioning'] },
+      upper: { name: 'Jour 4', focus: 'Upper', badge: 'Mix volume', slots: ['horizontalPush','horizontalPull','verticalPush','verticalPull','armSuperset'] },
+      lower: { name: 'Jour 5', focus: 'Lower', badge: 'Mix jambes', slots: ['hinge','squat','singleLeg','core','conditioning'] },
+      pushB: { name: 'Jour 4', focus: 'Push B', badge: 'Variation push', slots: ['verticalPush','horizontalPush','verticalPush','armSuperset','core'] },
+      pullB: { name: 'Jour 5', focus: 'Pull B', badge: 'Variation pull', slots: ['verticalPull','horizontalPull','verticalPull','armSuperset','conditioning'] },
+      legsB: { name: 'Jour 6', focus: 'Legs B', badge: 'Variation jambes', slots: ['singleLeg','hinge','squat','core','conditioning'] }
+    };
+
+    function getWeightProfile(equipment, availableWeights, kbList) {
+      if (equipment === 'bodyweight') return { label: 'Poids du corps', note: 'La progression se fait surtout via répétitions, tempo, pauses et variantes plus difficiles.', heavy: false, medium: false, multiple: false, kind: 'bodyweight', list: '' };
+      if (equipment === 'gym') return { label: 'Salle complète', note: 'Progression classique sur la charge, les répétitions et les machines disponibles.', heavy: true, medium: true, multiple: true, kind: 'gym', list: '' };
+      if (availableWeights === 'multiple') return { label: 'Plusieurs kettlebells', note: `Tu peux progresser en changeant de kettlebell selon l’exercice. Poids listés: ${kbList || 'non précisés'}.`, heavy: true, medium: true, multiple: true, kind: 'kettlebell', list: kbList || '' };
+      if (availableWeights === 'one') return { label: 'Une seule kettlebell', note: `Tu n’as qu’une charge fixe: la progression doit surtout passer par les répétitions, le tempo, les pauses, l’amplitude et les variantes. Poids listé: ${kbList || 'à préciser'}.`, heavy: false, medium: true, multiple: false, kind: 'kettlebell', list: kbList || '' };
+      return { label: 'Non précisé', note: 'Préciser si tu as une ou plusieurs kettlebells aide à adapter le discours de progression.', heavy: false, medium: true, multiple: false, kind: 'kettlebell', list: kbList || '' };
+    }
+
+    function adjustExerciseName(name, slot, equipment, weightProfile) {
+      if (equipment !== 'kettlebell' && equipment !== 'dumbbells') return name;
+      if (equipment === 'kettlebell') {
+        if (!weightProfile.heavy && ['squat','hinge','horizontalPush','verticalPush','horizontalPull','singleLeg'].includes(slot)) {
+          if (name.includes('Bottom-up press')) return 'Bottom-up press léger';
+          if (name.includes('Kettlebell swing')) return 'Kettlebell swing contrôlé';
+          if (name.includes('Front squat kettlebell')) return 'Goblet squat tempo kettlebell';
+          if (name.includes('Deadlift kettlebell sumo')) return 'Deadlift kettlebell sumo tempo';
+        }
+        if (weightProfile.heavy && slot === 'verticalPush' && name.includes('Half kneeling')) return 'Push press kettlebell lourd';
+      }
+      if (equipment === 'dumbbells' && !weightProfile.heavy && slot === 'hinge' && name.includes('Soulevé de terre roumain')) return 'Soulevé de terre roumain haltères tempo';
+      return name;
+    }
+
+    function getPrescription(slot, level, equipment, weightProfile) {
+      const cfg = levelConfig[level];
+      if (slot === 'conditioning') {
+        const reps = equipment === 'kettlebell' && !weightProfile.heavy ? '10-15 min densité' : '8-12 min ou intervalles';
+        return { sets: '1 bloc', reps, rest: 'Selon format', note: 'Finisher cardio ou densité' };
+      }
+      if (slot === 'core') return { sets: cfg.baseSetsIso, reps: cfg.repIso, rest: cfg.restIso, note: 'Gainage ou anti-rotation' };
+      if (slot === 'armSuperset') return { sets: cfg.baseSetsIso, reps: cfg.repIso, rest: '30-45 s entre exercices', note: 'Superset bras' };
+      if (slot === 'singleLeg') {
+        const reps = (equipment === 'kettlebell' || equipment === 'dumbbells') && !weightProfile.heavy ? '10-14 / côté' : cfg.repSecondary;
+        return { sets: Math.max(3, cfg.baseSetsIso), reps, rest: cfg.restSecondary, note: 'Unilatéral / stabilité' };
+      }
+      const mainSlots = ['squat','hinge','horizontalPush','verticalPush','horizontalPull','verticalPull'];
+      if (mainSlots.includes(slot)) {
+        let reps = cfg.repMain;
+        let note = 'Mouvement principal';
+        if ((equipment === 'kettlebell' || equipment === 'dumbbells') && !weightProfile.heavy && slot !== 'verticalPull') {
+          reps = level === 'advanced' ? '8-12' : '10-15';
+          note = 'Mouvement principal ajusté au poids disponible';
+        }
+        if (equipment === 'kettlebell' && slot === 'hinge' && weightProfile.medium) reps = '12-20';
+        return { sets: cfg.baseSetsMain, reps, rest: cfg.restMain, note };
+      }
+      return { sets: cfg.baseSetsIso, reps: cfg.repSecondary, rest: cfg.restSecondary, note: 'Assistance' };
+    }
+
+    function getExercise(slot, equipment, index, weightProfile) {
+      const list = templates[equipment].exercises[slot];
+      return adjustExerciseName(list[index % list.length], slot, equipment, weightProfile);
+    }
+
+    function buildSessions(days, equipment, level, weightProfile) {
+      const split = splitMap[days];
+      return split.map((key, sessionIndex) => {
+        const blueprint = sessionBlueprints[key];
+        const exercises = blueprint.slots.map((slot, i) => {
+          const ex = getExercise(slot, equipment, sessionIndex + i, weightProfile);
+          const prescription = getPrescription(slot, level, equipment, weightProfile);
+          return { slot, name: ex, ...prescription };
+        });
+        return { ...blueprint, exercises };
+      });
+    }
+
+    function weeklyLayout(days) {
+      const base = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+      const map = { 2: ['Lundi', 'Jeudi'], 3: ['Lundi', 'Mercredi', 'Vendredi'], 4: ['Lundi', 'Mardi', 'Jeudi', 'Samedi'], 5: ['Lundi', 'Mardi', 'Jeudi', 'Vendredi', 'Samedi'], 6: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'] };
+      const trainingDays = map[days];
+      return base.map(day => ({ day, training: trainingDays.includes(day) }));
+    }
+
+
+    const exerciseReferenceLibrary = {
+      'Kettlebell swing': {
+        muscles: 'Fessiers, ischios, gainage, érecteurs du rachis.',
+        description: 'Place les pieds un peu plus larges que les hanches, saisie à deux mains, épaules basses et poitrine ouverte. Fais une charnière de hanches en envoyant le bassin en arrière, garde le dos neutre et le poids plutôt vers les talons. Propulse la kettlebell en contractant fort les fessiers, puis laisse-la redescendre sous contrôle sans tirer avec les bras; pense surtout à charger l’arrière des cuisses et les fessiers.',
+        links: [
+          { label: 'Tutoriel FR', url: 'https://www.youtube.com/watch?v=txvgVmyEhJ8' },
+          { label: 'Guide détaillé', url: 'https://www.youtube.com/watch?v=jMnBADJXLd0' }
+        ],
+        image: 'https://sportscienceinsider.com/wp-content/uploads/2023/12/Basics-and-Technique-on-Kettlebell-Swing.png'
+      },
+      'Kettlebell swing contrôlé': {
+        muscles: 'Fessiers, ischios, gainage, chaîne postérieure.',
+        description: 'Version pédagogique du swing: verrouille les abdos avant chaque rep, garde la nuque longue et arrête la montée quand la kettlebell arrive à hauteur de poitrine. Le contrôle se fait surtout au retour, quand tu absorbes la charge avec une charnière nette; la sensation principale doit rester dans les hanches et non dans les épaules.',
+        links: [
+          { label: 'Tutoriel FR', url: 'https://www.youtube.com/watch?v=hnPJ1XhN1jE' },
+          { label: 'Guide vidéo', url: 'https://www.youtube.com/watch?v=jMnBADJXLd0' }
+        ],
+        image: 'https://weighttraining.guide/wp-content/uploads/2017/03/Kettlebell-Swing-resized.png'
+      },
+      'Soulevé de terre roumain kettlebell': {
+        muscles: 'Ischios, fessiers, bas du dos, adducteurs.',
+        description: 'Tiens la kettlebell près du bassin, omoplates légèrement serrées, genoux seulement déverrouillés. Fais glisser les hanches loin vers l’arrière tout en gardant le dos plat et la kettlebell proche du corps; descends jusqu’à sentir un étirement net dans les ischios. Remonte en poussant le sol et en contractant les fessiers, sans casser l’alignement du tronc.',
+        links: [],
+        image: ''
+      },
+      'Deadlift kettlebell sumo': {
+        muscles: 'Adducteurs, fessiers, quadriceps, chaîne postérieure.',
+        description: 'Écarte les pieds plus large que les épaules, pointes légèrement ouvertes, kettlebell au centre. Descends en ouvrant les genoux dans l’axe des pieds, poitrine sortie et bras tendus, puis pousse fort dans le sol pour remonter la charge. Pense à répartir la pression sur tout le pied et à sentir les adducteurs et fessiers travailler ensemble.',
+        links: [],
+        image: ''
+      },
+      'Goblet squat kettlebell': {
+        muscles: 'Quadriceps, fessiers, adducteurs, gainage antérieur.',
+        description: 'Tiens la kettlebell contre la poitrine avec les coudes près du corps, cage thoracique empilée au-dessus du bassin. Descends en pliant simultanément genoux et hanches, garde les talons au sol et les genoux orientés comme les pointes de pieds. Contrôle la descente, fais une courte pause en bas si besoin, puis remonte en poussant fort le sol pour cibler surtout quadriceps et fessiers.',
+        links: [
+          { label: 'Guide article', url: 'https://www.puregym.com/exercises/legs/quad-exercises/squats/goblet-squat/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=gCESNsDsbqk' }
+        ],
+        image: 'https://weighttraining.guide/wp-content/uploads/2016/12/Goblet-squat-resized.png'
+      },
+      'Goblet squat': {
+        muscles: 'Quadriceps, fessiers, adducteurs, gainage.',
+        description: 'Charge serrée contre le torse, regard fixe devant toi, tronc gainé pour éviter de t’écraser en avant. Inspire avant de descendre, garde le poids réparti sur tout le pied et laisse les genoux avancer naturellement tant que les talons restent au sol. La montée doit se faire en bloc en pensant aux quadriceps et aux fessiers.',
+        links: [
+          { label: 'Guide article', url: 'https://www.puregym.com/exercises/legs/quad-exercises/squats/goblet-squat/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=MeIiIdhvXT4' }
+        ],
+        image: 'https://weighttraining.guide/wp-content/uploads/2016/12/Goblet-squat-resized.png'
+      },
+      'Floor press kettlebell': {
+        muscles: 'Pectoraux, triceps, deltoïdes antérieurs.',
+        description: 'Allonge-toi au sol, genoux fléchis, omoplates légèrement rapprochées pour stabiliser le haut du dos. Descends la charge jusqu’à ce que le bras touche doucement le sol sans rebondir, avant-bras presque vertical et poignet empilé sur le coude. Pousse en gardant l’épaule abaissée et focalise-toi sur la contraction des pectoraux et des triceps.',
+        links: [
+          { label: 'Guide article', url: 'https://www.menshealth.com/uk/how-tos/a61608734/floor-press-workout/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=riT31sLb8HU' }
+        ],
+        image: 'https://hips.hearstapps.com/hmg-prod/images/floor-press-1586948016.jpg?resize=980%3A%2A'
+      },
+      'Développé couché au sol': {
+        muscles: 'Pectoraux, triceps, épaules avant.',
+        description: 'Place les pieds bien ancrés au sol, serre légèrement les omoplates et garde les côtes basses pour éviter d’hypercambrer. Descends les haltères de manière symétrique jusqu’au contact léger des triceps avec le sol, puis remonte en ligne verticale sans perdre la tension. Le mouvement doit rester contrôlé pour charger la poitrine sans stresser inutilement l’épaule.',
+        links: [
+          { label: 'Guide article', url: 'https://www.menshealth.com/uk/how-tos/a61608734/floor-press-workout/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=riT31sLb8HU' }
+        ],
+        image: 'https://hips.hearstapps.com/hmg-prod/images/floor-press-1586948016.jpg?resize=980%3A%2A'
+      },
+      'Développé couché au sol unilatéral': {
+        muscles: 'Pectoraux, triceps, gainage anti-rotation.',
+        description: 'Une seule charge à la fois: plaque fortement le haut du dos au sol et empêche le tronc de tourner quand tu presses. Descends lentement le coude au sol, marque un contact léger, puis remonte en gardant le poignet stable au-dessus du coude. En plus du pec et du triceps, tu dois sentir les abdos travailler pour stabiliser le buste.',
+        links: [],
+        image: ''
+      },
+      'Développé militaire kettlebell': {
+        muscles: 'Épaules, triceps, gainage, dentelé antérieur.',
+        description: 'Démarre en position rack: poignée en diagonale dans la paume, poignet neutre, avant-bras vertical et coude proche du buste. Serre les fessiers et les abdos avant de pousser la charge au-dessus de la tête, puis verrouille sans hausser l’épaule. Contrôle la descente jusqu’au rack en gardant l’avant-bras vertical et la tension sur le deltoïde.',
+        links: [],
+        image: ''
+      },
+      'Push press kettlebell': {
+        muscles: 'Épaules, triceps, quadriceps, gainage.',
+        description: 'Pars du rack solide, fais une légère flexion de genoux puis une extension explosive pour transmettre de la force à la kettlebell. Termine avec le bras verrouillé au-dessus de la tête sans cambrer le bas du dos, puis redescends sous contrôle. L’impulsion vient des jambes, mais le verrouillage final doit rester piloté par l’épaule et le triceps.',
+        links: [],
+        image: ''
+      },
+      'Half kneeling press': {
+        muscles: 'Épaules, triceps, gainage, fessier de la jambe arrière.',
+        description: 'Place un genou au sol et l’autre pied devant à 90 degrés, bassin bien aligné et fessier de la jambe arrière contracté. Presse la charge verticalement sans te pencher ni tourner, puis redescends lentement vers le rack. Cette position aide à sentir le gainage et à mieux contrôler l’alignement du buste.',
+        links: [],
+        image: ''
+      },
+      'Bottom-up press': {
+        muscles: 'Épaules, avant-bras, coiffe des rotateurs, gainage.',
+        description: 'Tiens la kettlebell à l’envers avec la base vers le plafond, poignet solide et coude sous la charge. Monte lentement en ligne verticale sans laisser la kettlebell basculer, puis redescends avec encore plus de contrôle. L’objectif principal est la stabilité de l’épaule et de la prise, plus que la charge lourde.',
+        links: [],
+        image: ''
+      },
+      'Bottom-up press léger': {
+        muscles: 'Épaules, avant-bras, stabilisateurs scapulaires.',
+        description: 'Même principe que le bottom-up press, mais avec une charge légère pour apprendre à verrouiller le poignet et à garder l’épaule centrée. Monte lentement, fixe les abdos et évite tout mouvement parasite du coude. Tu dois sentir une forte demande de stabilité dans l’avant-bras et l’épaule.',
+        links: [],
+        image: ''
+      },
+      'Rowing kettlebell unilatéral': {
+        muscles: 'Grand dorsal, rhomboïdes, trapèzes moyens, biceps.',
+        description: 'Prends un appui stable avec le tronc incliné et le dos neutre, puis laisse le bras chargé pendre sous l’épaule. Démarre en abaissant et rapprochant légèrement l’omoplate, puis tire le coude vers la hanche sans tourner le buste. Contrôle la descente complète pour sentir l’étirement du dos avant la répétition suivante.',
+        links: [
+          { label: 'Guide article', url: 'https://www.acefitness.org/resources/everyone/exercise-library/126/single-arm-row/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=nMFCMNKnLgQ&vl=fr' }
+        ],
+        image: ''
+      },
+      'Rowing haltère unilatéral': {
+        muscles: 'Grand dorsal, milieu du dos, biceps, arrière d’épaule.',
+        description: 'Main et genou opposés en appui si besoin, dos plat, nuque neutre et abdos serrés pour éviter la rotation du tronc. Tire l’haltère vers la hanche en menant avec le coude, pas avec la main, puis redescends lentement jusqu’à l’extension presque complète du bras. Concentre-toi sur le coude qui frotte le buste pour mieux sentir le grand dorsal.',
+        links: [
+          { label: 'Guide article', url: 'https://www.acefitness.org/resources/everyone/exercise-library/126/single-arm-row/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=nMFCMNKnLgQ&vl=fr' }
+        ],
+        image: ''
+      },
+      'Dead bug kettlebell': {
+        muscles: 'Transverse, grand droit, obliques, stabilisateurs lombaires.',
+        description: 'Allonge-toi sur le dos, lombaires plaquées au sol, bras tendus au-dessus des épaules et jambes à 90/90. Maintiens la charge stable pendant que tu tends bras et jambe opposés sans laisser le bas du dos se creuser. Le bon repère est de sentir le ventre fort et les côtes rentrées pendant tout le mouvement.',
+        links: [
+          { label: 'Guide article', url: 'https://www.menshealth.com/uk/how-tos/a61885316/dead-bug-exercise/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=xtTIb6dC-vI' }
+        ],
+        image: ''
+      },
+      'Dead bug': {
+        muscles: 'Transverse, obliques, grand droit, gainage profond.',
+        description: 'Plaque doucement les lombaires au sol avant de bouger, puis allonge lentement une jambe et le bras opposé sans perdre cette pression. Expire pendant l’extension pour mieux verrouiller les abdos, puis reviens au centre avec contrôle. Le focus est la stabilité du tronc, pas la vitesse.',
+        links: [
+          { label: 'Guide article', url: 'https://www.menshealth.com/uk/how-tos/a61885316/dead-bug-exercise/' },
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=xtTIb6dC-vI' }
+        ],
+        image: ''
+      },
+      'Suitcase carry': {
+        muscles: 'Obliques, gainage anti-inclinaison, avant-bras, trapèzes.',
+        description: 'Porte la kettlebell d’un seul côté comme une valise, épaules de niveau et buste haut. Marche lentement sans te pencher vers la charge, en serrant les abdos et les fessiers pour garder le bassin stable. L’objectif principal est de résister à l’inclinaison latérale, donc tu dois sentir surtout les obliques travailler.',
+        links: [],
+        image: ''
+      },
+      'Windmill léger': {
+        muscles: 'Obliques, épaules stabilisatrices, hanches, ischios.',
+        description: 'Garde la kettlebell verrouillée au-dessus de la tête, regarde la charge et pousse la hanche du côté chargé vers l’arrière. Descends en glissant la main libre le long de la jambe opposée, sans perdre l’alignement du bras au-dessus. Le mouvement doit être lent et très contrôlé, avec un gros travail de stabilité d’épaule et de mobilité de hanche.',
+        links: [],
+        image: ''
+      },
+      'Planche avec drag kettlebell': {
+        muscles: 'Gainage global, obliques, épaules, dentelé.',
+        description: 'Position de planche solide: mains sous les épaules, fessiers serrés, côtes rentrées et bassin stable. Fais glisser la kettlebell d’une main à l’autre sans laisser les hanches se balancer; écarte légèrement les pieds pour gagner en stabilité si besoin. Le focus principal est l’anti-rotation du tronc.',
+        links: [],
+        image: ''
+      },
+      'Split squat bulgare': {
+        muscles: 'Quadriceps, fessiers, adducteurs, stabilité de hanche.',
+        description: 'Pied arrière sur support, pied avant assez loin pour garder le talon au sol en bas. Descends verticalement avec le buste légèrement penché mais gainé, genou avant dans l’axe du pied, puis remonte en poussant surtout dans le pied avant. Cherche à sentir quadriceps et fessier de la jambe avant plutôt qu’un simple équilibre précaire.',
+        links: [
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=2C-uNgKwPLE' },
+          { label: 'Guide détaillé', url: 'https://www.youtube.com/watch?v=vLuhN_glFZ8' }
+        ],
+        image: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/12/bulgarian-split-squat-form.jpg'
+      },
+      'Split squat bulgare kettlebell': {
+        muscles: 'Quadriceps, fessiers, adducteurs, gainage.',
+        description: 'Même placement qu’un split squat bulgare classique, avec la charge gardée proche du tronc pour ne pas te faire basculer. Descends lentement, garde le genou avant stable et utilise la jambe avant pour remonter sans rebond. La kettlebell sert à augmenter la tension sur quadriceps et fessier, pas à te tirer vers l’avant.',
+        links: [
+          { label: 'Tutoriel vidéo', url: 'https://www.youtube.com/watch?v=vLuhN_glFZ8' },
+          { label: 'Guide article', url: 'https://www.healthline.com/health/fitness-exercise/bulgarian-split-squat' }
+        ],
+        image: 'https://www.inspireusafoundation.org/wp-content/uploads/2022/12/bulgarian-split-squat-form.jpg'
+      }
+    };
+
+    const fallbackDescriptions = {
+      squat: { muscles: 'Quadriceps, fessiers, adducteurs, gainage.', text: 'Cherche un appui complet au sol, genoux dans l’axe des pieds, tronc gainé et descente contrôlée avant une remontée puissante.' },
+      hinge: { muscles: 'Chaîne postérieure: ischios, fessiers, bas du dos.', text: 'Pense charnière de hanches: bassin en arrière, dos neutre, charge proche du corps, puis contraction forte des fessiers pour remonter.' },
+      horizontalPush: { muscles: 'Pectoraux, triceps, épaules avant.', text: 'Stabilise les omoplates, garde le poignet empilé au-dessus du coude, descends sous contrôle puis pousse sans perdre la tension du haut du corps.' },
+      verticalPush: { muscles: 'Épaules, triceps, gainage.', text: 'Verrouille les abdos et les fessiers avant de pousser au-dessus de la tête, sans hausser les épaules ni cambrer le bas du dos.' },
+      horizontalPull: { muscles: 'Grand dorsal, milieu du dos, biceps.', text: 'Initie par l’omoplate puis tire le coude vers la hanche ou le buste, sans tordre le tronc ni jeter la charge.' },
+      verticalPull: { muscles: 'Grand dorsal, grands ronds, biceps, abaisseurs des épaules.', text: 'Garde les épaules basses, la cage stable et focalise-toi sur le coude qui tire vers le bas pour charger le dos plutôt que les bras.' },
+      singleLeg: { muscles: 'Quadriceps, fessiers, adducteurs, stabilité.', text: 'Stabilise le bassin, contrôle la descente et fais le plus gros du travail avec la jambe avant ou la jambe d’appui.' },
+      core: { muscles: 'Gainage profond, obliques, transverse.', text: 'Le repère principal est de garder les côtes rentrées, le bassin stable et la respiration contrôlée pendant tout l’exercice.' },
+      armSuperset: { muscles: 'Biceps, triceps, avant-bras.', text: 'Garde les coudes stables, évite l’élan et contrôle la phase descendante pour garder la tension sur les bras.' },
+      conditioning: { muscles: 'Cardio, chaîne globale, endurance musculaire.', text: 'Cherche une technique propre malgré la fatigue, respiration rythmée et intensité soutenue mais contrôlable.' }
+    };
+    function normalizeExerciseName(name) {
+      return name
+        .replace(' tempo kettlebell', ' kettlebell')
+        .replace(' tempo', '')
+        .replace(' léger', '')
+        .replace(' lourd', '')
+        .replace(' contrôlé', '')
+        .trim();
+    }
+
+    function getExerciseReference(name, slot = '') {
+      const direct = exerciseReferenceLibrary[name];
+      if (direct) return direct;
+      const normalized = normalizeExerciseName(name);
+      if (exerciseReferenceLibrary[normalized]) return exerciseReferenceLibrary[normalized];
+      if (normalized.includes('Goblet squat')) return exerciseReferenceLibrary['Goblet squat'];
+      if (normalized.includes('swing')) return exerciseReferenceLibrary['Kettlebell swing'];
+      if (normalized.includes('Split squat bulgare')) return exerciseReferenceLibrary['Split squat bulgare'];
+      const fallback = fallbackDescriptions[slot] || { muscles: 'Muscles variables selon la variante.', text: 'Commence avec une version lente et contrôlée, cherche une posture stable et garde toujours la charge sous contrôle du début à la fin.' };
+      return {
+        muscles: fallback.muscles,
+        description: fallback.text,
+        links: [],
+        image: ''
+      };
+    }
+
+    function renderSummary(days, equipment, level, sessions, weightProfile) {
+      const cfg = levelConfig[level];
+      const recoveryDays = weeklyLayout(days).filter(d => !d.training).length;
+      const totalMainMoves = sessions.reduce((sum, s) => sum + s.exercises.filter(e => e.note.includes('Mouvement principal')).length, 0);
+      const cards = [
+        { kicker: 'Fréquence', value: `${days} séances`, mini: `${recoveryDays} jour(s) de récupération active / repos` },
+        { kicker: 'Matériel', value: equipmentLabels[equipment], mini: 'Exercices filtrés selon le contexte' },
+        { kicker: 'Kettlebells', value: weightProfile.label, mini: weightProfile.note },
+        { kicker: 'Niveau', value: cfg.label, mini: cfg.weeklySetsRange },
+        { kicker: 'Progression', value: '8 semaines', mini: `${totalMainMoves} mouvements majeurs suivis` }
+      ];
+      summaryEl.innerHTML = cards.map(card => `
+        <article class="card metric">
+          <div class="kicker">${card.kicker}</div>
+          <div class="value">${card.value}</div>
+          <div class="mini">${card.mini}</div>
+        </article>
+      `).join('');
+    }
+
+    function renderProgram(days, equipment, sessions) {
+      const layout = weeklyLayout(days);
+      const sessionMap = new Map(layout.filter(d => d.training).map((entry, idx) => [entry.day, sessions[idx]]));
+      programEl.innerHTML = layout.map(entry => {
+        if (!entry.training) {
+          return `
+            <article class="card day-card">
+              <div class="day-head">
+                <div>
+                  <div class="day-title">${entry.day}</div>
+                  <div class="day-type">Récupération active ou repos complet</div>
+                </div>
+                <span class="badge" style="background:color-mix(in srgb, var(--color-success) 14%, transparent); color:var(--color-success);">Recovery</span>
+              </div>
+              <div class="note-list">
+                <div>20 à 40 min de marche, mobilité, vélo doux ou étirements légers.</div>
+                <div>Objectif: récupérer sans ajouter de fatigue importante.</div>
+              </div>
+            </article>`;
+        }
+        const session = sessionMap.get(entry.day);
+        const daySlug = entry.day.toLowerCase().replace(/[^a-z]/g, '');
+        return `
+          <article class="card day-card">
+            <div class="day-head">
+              <div>
+                <div class="day-title">${entry.day} — ${session.name}</div>
+                <div class="day-type">${session.focus}</div>
+              </div>
+              <span class="badge">${session.badge}</span>
+            </div>
+            <table class="exercise-table">
+              <thead><tr><th>Exercice</th><th>Séries</th><th>Répétitions</th><th>Repos</th></tr></thead>
+              <tbody>
+                ${session.exercises.map((ex, exIdx) => {
+                  const isMain = ex.note.includes('Mouvement principal');
+                  const badge = isMain ? ' <span class="exercise-badge">Principal</span>' : '';
+                  const ref = getExerciseReference(ex.name, ex.slot);
+                  const detailId = `detail-${daySlug}-${exIdx}`;
+                  const linksHtml = ref.links.length
+                    ? `<div class="exercise-links">${ref.links.map(l => `<a class="exercise-link" href="${l.url}" target="_blank" rel="noopener noreferrer">${escapeHtml(l.label)}</a>`).join('')}</div>`
+                    : '';
+                  const imgHtml = ref.image
+                    ? `<img src="${ref.image}" alt="Illustration ${escapeHtml(ex.name)}" loading="lazy">`
+                    : '';
+                  return `
+                    <tr>
+                      <td data-label="Exercice">
+                        <button type="button" class="exercise-toggle" data-target="${detailId}" aria-expanded="false" aria-controls="${detailId}">▸ Détails</button>
+                        <strong style="display:inline-block; vertical-align:middle;">${ex.name}</strong>${badge}
+                        <span style="color:var(--color-text-muted); display:block; margin-top:4px;">${ex.note}</span>
+                      </td>
+                      <td data-label="Séries">${ex.sets}</td>
+                      <td data-label="Répétitions">${ex.reps}</td>
+                      <td data-label="Repos">${ex.rest}</td>
+                    </tr>
+                    <tr class="exercise-detail-row hidden" id="${detailId}">
+                      <td colspan="4" data-label="Détails">
+                        <div class="inline-detail">
+                          <div>
+                            <div class="inline-detail-muscles"><strong>Muscles ciblés :</strong> ${ref.muscles}</div>
+                            <div class="inline-detail-desc">${ref.description}</div>
+                            ${linksHtml}
+                          </div>
+                          ${imgHtml}
+                        </div>
+                      </td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </article>`;
+      }).join('');
+      bindExerciseToggleHandlers();
+    }
+
+    function bindExerciseToggleHandlers() {
+      programEl.querySelectorAll('.exercise-toggle').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = document.getElementById(btn.dataset.target);
+          if (!target) return;
+          const willShow = target.classList.contains('hidden');
+          target.classList.toggle('hidden');
+          btn.setAttribute('aria-expanded', String(willShow));
+          btn.textContent = willShow ? '▾ Détails' : '▸ Détails';
+        });
+      });
+    }
+
+    function renderProgression(level, equipment, weightProfile) {
+      const cfg = levelConfig[level];
+      const fixedLoad = (equipment === 'kettlebell' || equipment === 'dumbbells') && !weightProfile.multiple;
+      const kbLine = equipment === 'kettlebell' || equipment === 'dumbbells'
+        ? (weightProfile.multiple
+          ? 'Comme tu as plusieurs charges, tu peux changer de kettlebell ou d’haltères quand tu valides le haut de la fourchette sur toutes les séries.'
+          : 'Comme ta charge est fixe, la progression doit se faire surtout via répétitions, tempo, pauses, amplitude, densité ou variantes plus difficiles, pas via un pourcentage d’augmentation.')
+        : 'Progresse d’abord en répétitions, puis en charge quand la fourchette est validée avec une forme propre.';
+      const steps = fixedLoad
+        ? [
+            { week: 'Sem. 1', text: 'Choisis une charge qui laisse 2 à 3 répétitions en réserve. Note tes reps, ton tempo et la facilité perçue pour créer ton point de départ.' },
+            { week: 'Sem. 2', text: 'Garde la même charge et ajoute 1 répétition par série sur les mouvements principaux si la technique reste propre.' },
+            { week: 'Sem. 3', text: 'Conserve la même charge mais ralentis l’excentrique, ajoute une pause en bas ou augmente légèrement l’amplitude utile.' },
+            { week: 'Sem. 4', text: 'Monte encore d’un cran: +1 répétition par série, ou même volume en moins de temps si la technique reste stable.' },
+            { week: 'Sem. 5', text: 'Semaine de deload: réduis le volume d’environ 35 à 40 % et garde une intensité modérée, sans aller proche de l’échec.' },
+            { week: 'Sem. 6', text: 'Repars au-dessus de la semaine 3 avec plus de contrôle, un tempo propre et éventuellement une variante unilatérale plus exigeante.' },
+            { week: 'Sem. 7', text: 'Pousse la surcharge sur les mouvements prioritaires via reps, pauses, densité ou variante plus difficile selon ta marge.' },
+            { week: 'Sem. 8', text: 'Semaine de consolidation: vise un meilleur total de répétitions, une meilleure stabilité ou un tempo plus strict à charge égale.' }
+          ]
+        : [
+            { week: 'Sem. 1', text: 'Choisis des charges qui laissent 2 à 3 répétitions en réserve. Note toutes tes performances pour créer ton point de départ.' },
+            { week: 'Sem. 2', text: 'Garde la même charge et ajoute 1 répétition par série sur les mouvements principaux si la technique reste propre.' },
+            { week: 'Sem. 3', text: 'Augmente la charge sur les exercices principaux, ou passe à une variante plus dure si ton matériel est limité.' },
+            { week: 'Sem. 4', text: 'Monte encore d’un cran: +1 répétition par série, ou charge supérieure selon le matériel disponible et la récupération.' },
+            { week: 'Sem. 5', text: 'Semaine de deload: réduis le volume d’environ 35 à 40 % et garde une intensité modérée, sans aller proche de l’échec.' },
+            { week: 'Sem. 6', text: 'Repars légèrement au-dessus de la semaine 3. Cherche une exécution plus explosive sur la phase concentrique.' },
+            { week: 'Sem. 7', text: 'Pousse la surcharge sur les mouvements prioritaires: charge supérieure, +1 répétition ou densité accrue selon ta marge.' },
+            { week: 'Sem. 8', text: 'Semaine de consolidation: vise un meilleur total de répétitions à charge égale, ou une charge supérieure avec une forme identique.' }
+          ];
+      progressionEl.innerHTML = `
+        <h3 class="day-title" style="margin-bottom:var(--space-4);">Surcharge progressive sur 8 semaines</h3>
+        <p style="color:var(--color-text-muted); margin-bottom:var(--space-5);">Repères de progression pour le niveau ${cfg.label.toLowerCase()}: ${cfg.guidance} ${kbLine}</p>
+        <div class="timeline">${steps.map(step => `<div class="step"><div class="week-pill">${step.week}</div><div>${step.text}</div></div>`).join('')}</div>
+      `;
+    }
+
+    const LOG_STORAGE_KEY = 'pulseforge.logs.v1';
+
+    function loadAll() {
+      try {
+        const raw = localStorage.getItem(LOG_STORAGE_KEY);
+        if (!raw) return { logs: {}, sessionNotes: {} };
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && (parsed.logs || parsed.sessionNotes)) {
+          return { logs: parsed.logs || {}, sessionNotes: parsed.sessionNotes || {} };
+        }
+        return { logs: parsed || {}, sessionNotes: {} };
+      } catch (e) {
+        return { logs: {}, sessionNotes: {} };
+      }
+    }
+
+    function saveAll(data) {
+      try { localStorage.setItem(LOG_STORAGE_KEY, JSON.stringify(data)); }
+      catch (e) { console.warn('Sauvegarde impossible:', e); }
+    }
+
+    function loadLogs() { return loadAll().logs; }
+    function saveLogs(logs) { const all = loadAll(); all.logs = logs; saveAll(all); }
+    function loadSessionNotes() { return loadAll().sessionNotes; }
+    function saveSessionNotes(notes) { const all = loadAll(); all.sessionNotes = notes; saveAll(all); }
+
+    // Paste your Google OAuth Client ID below (from console.cloud.google.com → Credentials)
+    const GOOGLE_CLIENT_ID = 'PASTE_YOUR_CLIENT_ID_HERE.apps.googleusercontent.com';
+    const DRIVE_FILE_NAME = 'pulseforge-backup.json';
+    const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file';
+    const DRIVE_STORAGE_KEY = 'pulseforge.drive.v1';
+
+    let tokenClient = null;
+    let accessToken = null;
+    let driveFileId = null;
+    let userEmail = null;
+    let backupStatus = { state: 'idle', name: '', lastSavedAt: null, message: '' };
+
+    function isClientIdConfigured() {
+      return GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith('PASTE_YOUR_CLIENT_ID');
+    }
+
+    function waitForGIS(maxMs = 5000) {
+      return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const tick = () => {
+          if (window.google && window.google.accounts && window.google.accounts.oauth2) return resolve();
+          if (Date.now() - start > maxMs) return reject(new Error('Google Identity Services indisponible'));
+          setTimeout(tick, 80);
+        };
+        tick();
+      });
+    }
+
+    function ensureTokenClient() {
+      if (tokenClient) return;
+      tokenClient = google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: DRIVE_SCOPE,
+        callback: () => {}
+      });
+    }
+
+    function requestToken(interactive) {
+      return new Promise((resolve, reject) => {
+        ensureTokenClient();
+        tokenClient.callback = (response) => {
+          if (response && response.access_token) {
+            accessToken = response.access_token;
+            resolve(response);
+          } else {
+            reject(new Error(response && response.error ? response.error : 'OAuth refusé'));
+          }
+        };
+        tokenClient.error_callback = (err) => reject(new Error(err.type || 'Erreur OAuth'));
+        try {
+          tokenClient.requestAccessToken({ prompt: interactive ? 'consent' : '' });
+        } catch (e) { reject(e); }
+      });
+    }
+
+    async function driveFetch(url, options = {}) {
+      const opts = { ...options, headers: { ...(options.headers || {}), Authorization: `Bearer ${accessToken}` } };
+      let res = await fetch(url, opts);
+      if (res.status === 401) {
+        try { await requestToken(false); } catch (e) {
+          backupStatus = { state: 'needs-reconnect', name: userEmail || '', lastSavedAt: null, message: 'Session expirée' };
+          renderBackupBar();
+          throw new Error('Session expirée');
+        }
+        opts.headers.Authorization = `Bearer ${accessToken}`;
+        res = await fetch(url, opts);
+      }
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(`Drive API ${res.status}: ${text.slice(0, 200)}`);
+      }
+      return res;
+    }
+
+    async function findDriveFile(name) {
+      const q = encodeURIComponent(`name = '${name.replace(/'/g, "\\'")}' and trashed = false`);
+      const res = await driveFetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name,modifiedTime)&spaces=drive`);
+      const data = await res.json();
+      return (data.files && data.files[0]) || null;
+    }
+
+    async function createDriveFile(name, content) {
+      const boundary = '----pulseforge' + Math.random().toString(36).slice(2);
+      const metadata = { name, mimeType: 'application/json' };
+      const body =
+        `--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n` +
+        JSON.stringify(metadata) + `\r\n` +
+        `--${boundary}\r\nContent-Type: application/json\r\n\r\n` +
+        content + `\r\n--${boundary}--`;
+      const res = await driveFetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name', {
+        method: 'POST',
+        headers: { 'Content-Type': `multipart/related; boundary=${boundary}` },
+        body
+      });
+      const data = await res.json();
+      return data.id;
+    }
+
+    async function readDriveFile(fileId) {
+      const res = await driveFetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`);
+      return res.text();
+    }
+
+    async function updateDriveFile(fileId, content) {
+      await driveFetch(`https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: content
+      });
+    }
+
+    async function fetchUserEmail() {
+      try {
+        const res = await driveFetch('https://www.googleapis.com/oauth2/v3/userinfo');
+        const data = await res.json();
+        return data.email || '';
+      } catch (e) { return ''; }
+    }
+
+    function persistDriveLink() {
+      try {
+        localStorage.setItem(DRIVE_STORAGE_KEY, JSON.stringify({ fileId: driveFileId, userEmail }));
+      } catch (e) { /* ignore */ }
+    }
+
+    function clearDriveLink() {
+      try { localStorage.removeItem(DRIVE_STORAGE_KEY); } catch (e) { /* ignore */ }
+    }
+
+    function loadDriveLink() {
+      try {
+        const raw = localStorage.getItem(DRIVE_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) { return null; }
+    }
+
+    async function applyDriveContentToLocal() {
+      if (!driveFileId) return;
+      const text = await readDriveFile(driveFileId);
+      if (!text.trim()) return;
+      const data = JSON.parse(text);
+      if (!data || typeof data !== 'object') return;
+      if (data.logs || data.sessionNotes) {
+        saveAll({ logs: data.logs || {}, sessionNotes: data.sessionNotes || {} });
+      } else {
+        saveAll({ logs: data, sessionNotes: {} });
+      }
+    }
+
+    async function connectDrive() {
+      if (!isClientIdConfigured()) {
+        backupStatus = { state: 'unconfigured', name: '', lastSavedAt: null, message: 'Client ID Google manquant dans le code' };
+        renderBackupBar();
+        return;
+      }
+      try {
+        backupStatus = { state: 'connecting', name: '', lastSavedAt: null, message: '' };
+        renderBackupBar();
+        await waitForGIS();
+        await requestToken(true);
+        userEmail = await fetchUserEmail();
+        const found = await findDriveFile(DRIVE_FILE_NAME);
+        if (found) {
+          driveFileId = found.id;
+          await applyDriveContentToLocal();
+        } else {
+          driveFileId = await createDriveFile(DRIVE_FILE_NAME, JSON.stringify(loadAll(), null, 2));
+        }
+        persistDriveLink();
+        backupStatus = { state: 'linked', name: userEmail || DRIVE_FILE_NAME, lastSavedAt: new Date(), message: '' };
+        renderTracking(lastGeneratedSessions);
+        renderCycleBanner();
+        renderBackupBar();
+      } catch (e) {
+        backupStatus = { state: 'error', name: userEmail || '', lastSavedAt: null, message: e.message || 'Connexion échouée' };
+        renderBackupBar();
+      }
+    }
+
+    async function reconnectDrive() {
+      await connectDrive();
+    }
+
+    function disconnectDrive() {
+      try { if (accessToken && google && google.accounts) google.accounts.oauth2.revoke(accessToken, () => {}); } catch (e) { /* ignore */ }
+      accessToken = null;
+      driveFileId = null;
+      userEmail = null;
+      clearDriveLink();
+      backupStatus = { state: 'idle', name: '', lastSavedAt: null, message: '' };
+      renderBackupBar();
+    }
+
+    async function autoSaveToFile() {
+      if (!driveFileId || !accessToken) return;
+      try {
+        await updateDriveFile(driveFileId, JSON.stringify(loadAll(), null, 2));
+        backupStatus.state = 'linked';
+        backupStatus.lastSavedAt = new Date();
+        backupStatus.message = '';
+        renderBackupBar();
+      } catch (e) {
+        if (String(e.message).includes('Session expirée')) return;
+        backupStatus.state = 'error';
+        backupStatus.message = e.message;
+        renderBackupBar();
+      }
+    }
+
+    async function initBackup() {
+      if (!isClientIdConfigured()) {
+        backupStatus = { state: 'unconfigured', name: '', lastSavedAt: null, message: 'Client ID Google à configurer dans le code' };
+        return;
+      }
+      const cached = loadDriveLink();
+      if (!cached) {
+        backupStatus = { state: 'idle', name: '', lastSavedAt: null, message: '' };
+        return;
+      }
+      driveFileId = cached.fileId;
+      userEmail = cached.userEmail || '';
+      try {
+        await waitForGIS();
+        await requestToken(false);
+        await applyDriveContentToLocal();
+        backupStatus = { state: 'linked', name: userEmail || DRIVE_FILE_NAME, lastSavedAt: null, message: 'Données chargées depuis Drive' };
+      } catch (e) {
+        backupStatus = { state: 'needs-reconnect', name: userEmail || '', lastSavedAt: null, message: '' };
+      }
+    }
+
+    function exportLogsManual() {
+      const blob = new Blob([JSON.stringify(loadAll(), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `pulseforge-backup-${todayISO()}.json`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function importLogsManual(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || typeof data !== 'object') throw new Error('Format invalide');
+          if (data.logs || data.sessionNotes) {
+            saveAll({ logs: data.logs || {}, sessionNotes: data.sessionNotes || {} });
+          } else {
+            saveAll({ logs: data, sessionNotes: {} });
+          }
+          renderTracking(lastGeneratedSessions);
+          renderCycleBanner();
+          backupStatus.message = `Importé depuis ${file.name}`;
+          renderBackupBar();
+        } catch (e) {
+          backupStatus.state = 'error';
+          backupStatus.message = `Fichier invalide: ${e.message}`;
+          renderBackupBar();
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function formatTime(d) {
+      const pad = n => String(n).padStart(2, '0');
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function renderBackupBar() {
+      let icon, iconClass, title, subtitle, actions;
+      if (backupStatus.state === 'unconfigured') {
+        icon = '⚙️'; iconClass = 'warn';
+        title = 'Configuration Google Drive incomplète';
+        subtitle = 'Le Client ID Google n’est pas renseigné dans le code. Sans ça, la sauvegarde Drive ne peut pas s’activer. Tu peux quand même utiliser l’export/import manuel.';
+        actions = `
+          <button type="button" class="btn-small" id="btnExport">Télécharger une copie</button>
+          <button type="button" class="btn-small" id="btnImport">Charger un fichier</button>
+        `;
+      } else if (backupStatus.state === 'connecting') {
+        icon = '…'; iconClass = '';
+        title = 'Connexion à Google Drive…';
+        subtitle = 'Si une fenêtre Google s’est ouverte, autorise PulseForge à créer/lire son fichier de sauvegarde.';
+        actions = '';
+      } else if (backupStatus.state === 'linked') {
+        icon = '✓'; iconClass = 'ok';
+        title = `Lié à Google Drive · ${escapeHtml(backupStatus.name || DRIVE_FILE_NAME)}`;
+        subtitle = backupStatus.lastSavedAt
+          ? `Synchronisé à ${formatTime(backupStatus.lastSavedAt)}${backupStatus.message ? ' · ' + escapeHtml(backupStatus.message) : ''}`
+          : (backupStatus.message ? escapeHtml(backupStatus.message) : 'Les modifications sont sauvegardées automatiquement dans ton Drive.');
+        actions = `
+          <button type="button" class="btn-small" id="btnSaveNow">Sauvegarder maintenant</button>
+          <button type="button" class="btn-small" id="btnExport">Télécharger une copie</button>
+          <button type="button" class="btn-small" id="btnUnlink">Déconnecter</button>
+        `;
+      } else if (backupStatus.state === 'needs-reconnect') {
+        icon = '🔒'; iconClass = '';
+        title = `Reconnecte ton Google Drive${backupStatus.name ? ' (' + escapeHtml(backupStatus.name) + ')' : ''}`;
+        subtitle = 'Ta session Google a expiré (normal après quelques heures). Clique pour rouvrir la connexion et recharger tes données.';
+        actions = `
+          <button type="button" class="btn-small primary" id="btnConnect">Reconnecter</button>
+          <button type="button" class="btn-small" id="btnUnlink">Oublier ce compte</button>
+        `;
+      } else if (backupStatus.state === 'error') {
+        icon = '!'; iconClass = 'warn';
+        title = 'Erreur de sauvegarde Drive';
+        subtitle = escapeHtml(backupStatus.message || 'Erreur inconnue');
+        actions = `
+          <button type="button" class="btn-small primary" id="btnConnect">Réessayer</button>
+          <button type="button" class="btn-small" id="btnUnlink">Déconnecter</button>
+        `;
+      } else {
+        icon = '☁️'; iconClass = '';
+        title = 'Sauvegarde Google Drive non activée';
+        subtitle = 'Active la sauvegarde pour synchroniser tes séances entre tous tes appareils (PC, iPhone, iPad). Stockage : ton Google Drive, fichier privé créé par l’app.';
+        actions = `
+          <button type="button" class="btn-small primary" id="btnConnect">Connecter Google Drive</button>
+          <button type="button" class="btn-small" id="btnImport">Charger un fichier</button>
+        `;
+      }
+      backupBarEl.innerHTML = `
+        <div class="backup-status">
+          <div class="backup-icon ${iconClass}">${icon}</div>
+          <div class="backup-text">
+            <strong>${title}</strong>
+            <small>${subtitle}</small>
+          </div>
+        </div>
+        <div class="backup-actions">${actions}</div>
+      `;
+      const bind = (id, fn) => { const el = document.getElementById(id); if (el) el.addEventListener('click', fn); };
+      bind('btnConnect', connectDrive);
+      bind('btnUnlink', disconnectDrive);
+      bind('btnSaveNow', autoSaveToFile);
+      bind('btnExport', exportLogsManual);
+      bind('btnImport', () => importFileInputEl.click());
+    }
+
+    importFileInputEl.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) importLogsManual(file);
+      e.target.value = '';
+    });
+
+    let lastGeneratedSessions = [];
+    let lastWeightProfile = { multiple: false, heavy: false, medium: false, kind: 'gym' };
+
+    function todayISO() {
+      const d = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    }
+
+    const dateFormatterFR = new Intl.DateTimeFormat('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    function formatDateFR(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return dateFormatterFR.format(new Date(y, m - 1, d));
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+    }
+
+    function addLogEntry(exerciseName, entry) {
+      const logs = loadLogs();
+      if (!logs[exerciseName]) logs[exerciseName] = [];
+      logs[exerciseName].push(entry);
+      logs[exerciseName].sort((a, b) => b.date.localeCompare(a.date));
+      saveLogs(logs);
+      autoSaveToFile();
+    }
+
+    function deleteLogEntry(exerciseName, idx) {
+      const logs = loadLogs();
+      if (!logs[exerciseName]) return;
+      logs[exerciseName].splice(idx, 1);
+      if (!logs[exerciseName].length) delete logs[exerciseName];
+      saveLogs(logs);
+      autoSaveToFile();
+    }
+
+    function getCycleInfo() {
+      const { logs, sessionNotes } = loadAll();
+      const dates = [];
+      Object.values(logs).forEach(arr => arr.forEach(e => { if (e.date) dates.push(e.date); }));
+      Object.values(sessionNotes).forEach(arr => arr.forEach(n => { if (n.date) dates.push(n.date); }));
+      if (!dates.length) return { active: false };
+      dates.sort();
+      const startStr = dates[0];
+      const [sy, sm, sd] = startStr.split('-').map(Number);
+      const start = new Date(sy, sm - 1, sd);
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const daysElapsed = Math.max(0, Math.round((today - start) / 86400000));
+      const week = Math.floor(daysElapsed / 7) + 1;
+      const cappedWeek = Math.min(8, week);
+      const isDeload = cappedWeek === 5;
+      const isComplete = week > 8;
+      const progressPct = Math.min(100, (Math.min(daysElapsed, 56) / 56) * 100);
+      return { active: true, week: cappedWeek, rawWeek: week, isDeload, isComplete, startDate: startStr, daysElapsed, progressPct };
+    }
+
+    function renderCycleBanner() {
+      const info = getCycleInfo();
+      if (!info.active) {
+        cycleBannerEl.classList.add('hidden');
+        cycleBannerEl.innerHTML = '';
+        return;
+      }
+      cycleBannerEl.classList.remove('hidden');
+      cycleBannerEl.classList.toggle('deload', info.isDeload);
+      const startLabel = formatDateFR(info.startDate);
+      let title, subtitle;
+      if (info.isComplete) {
+        title = `Cycle de 8 semaines terminé`;
+        subtitle = `Démarré le ${startLabel} — soit ${info.daysElapsed} jours. Commence un nouveau cycle ou continue à logger pour étendre l'historique.`;
+      } else {
+        title = `Semaine ${info.week} / 8 du cycle${info.isDeload ? ' · Deload' : ''}`;
+        const remaining = 8 - info.week;
+        subtitle = `Cycle démarré le ${startLabel}. ${remaining > 0 ? `${remaining} semaine${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.` : 'Dernière semaine.'}`;
+      }
+      cycleBannerEl.innerHTML = `
+        <div class="cycle-info">
+          <strong>${title}</strong>
+          <small>${subtitle}</small>
+        </div>
+        <div class="cycle-progress" aria-label="Progression du cycle">
+          <div class="cycle-progress-fill ${info.isDeload ? 'deload' : ''}" style="width: ${info.progressPct.toFixed(0)}%"></div>
+        </div>
+        ${info.isDeload ? '<div class="cycle-deload-alert" style="flex-basis:100%;">🛌 Semaine de deload : réduis le volume de 35-40 %, garde une intensité modérée, ne va pas proche de l’échec.</div>' : ''}
+      `;
+    }
+
+    function upsertSessionNote(sessionName, date, text) {
+      const all = loadSessionNotes();
+      if (!all[sessionName]) all[sessionName] = [];
+      const existingIdx = all[sessionName].findIndex(n => n.date === date);
+      if (existingIdx >= 0) {
+        if (text.trim()) all[sessionName][existingIdx].text = text.trim();
+        else all[sessionName].splice(existingIdx, 1);
+      } else if (text.trim()) {
+        all[sessionName].push({ date, text: text.trim() });
+      }
+      all[sessionName].sort((a, b) => b.date.localeCompare(a.date));
+      if (!all[sessionName].length) delete all[sessionName];
+      saveSessionNotes(all);
+      autoSaveToFile();
+    }
+
+    function deleteSessionNote(sessionName, idx) {
+      const all = loadSessionNotes();
+      if (!all[sessionName]) return;
+      all[sessionName].splice(idx, 1);
+      if (!all[sessionName].length) delete all[sessionName];
+      saveSessionNotes(all);
+      autoSaveToFile();
+    }
+
+    function renderSessionNotes(sessionName) {
+      const all = loadSessionNotes();
+      const notes = all[sessionName] || [];
+      const today = todayISO();
+      return `
+        <div class="session-notes" data-session-notes="${escapeHtml(sessionName)}">
+          <div class="session-notes-title">📓 Notes de séance</div>
+          <form class="session-notes-form" data-session="${escapeHtml(sessionName)}">
+            <input type="date" name="date" value="${today}" required>
+            <input type="text" name="text" placeholder="Sommeil, ressenti, douleur, contexte..." maxlength="240" required>
+            <button type="submit">Ajouter</button>
+          </form>
+          ${notes.length ? `<div class="session-notes-list">
+            ${notes.map((n, i) => `
+              <div class="session-note-entry">
+                <span class="note-date">${formatDateFR(n.date)}</span>
+                <span class="note-text">${escapeHtml(n.text)}</span>
+                <button type="button" class="btn-del" data-note-session="${escapeHtml(sessionName)}" data-note-idx="${i}" aria-label="Supprimer">×</button>
+              </div>
+            `).join('')}
+          </div>` : ''}
+        </div>
+      `;
+    }
+
+    function reRenderSessionNotes(sessionName) {
+      const el = trackingEl.querySelector(`[data-session-notes="${CSS.escape(sessionName)}"]`);
+      if (!el) return;
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = renderSessionNotes(sessionName).trim();
+      el.replaceWith(wrapper.firstChild);
+    }
+
+    const activeTimers = new Map();
+    let audioCtx = null;
+
+    function parseRestSeconds(restStr) {
+      if (!restStr) return 60;
+      const match = String(restStr).match(/(\d+)/);
+      return match ? parseInt(match[1], 10) : 60;
+    }
+
+    function ping(frequency = 880) {
+      try {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.frequency.value = frequency;
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.2, audioCtx.currentTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.5);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.55);
+      } catch (e) { /* audio unavailable */ }
+    }
+
+    function pingFinish() {
+      ping(660);
+      setTimeout(() => ping(880), 180);
+      setTimeout(() => ping(1100), 360);
+    }
+
+    function formatRemaining(secs) {
+      const s = Math.max(0, Math.round(secs));
+      const mm = String(Math.floor(s / 60)).padStart(2, '0');
+      const ss = String(s % 60).padStart(2, '0');
+      return `${mm}:${ss}`;
+    }
+
+    function renderRestTimer(exerciseName) {
+      const t = activeTimers.get(exerciseName);
+      if (!t) return '';
+      const isDone = t.remaining <= 0;
+      const pauseIcon = t.paused ? '▶' : '⏸';
+      return `
+        <div class="rest-timer ${isDone ? 'done' : ''}" data-timer="${escapeHtml(exerciseName)}">
+          <div>
+            <div class="timer-display">${isDone ? '✓ Repos terminé' : formatRemaining(t.remaining)}</div>
+            <div class="timer-label">${isDone ? 'Prêt pour la prochaine série' : `Repos · ${t.total}s prescrit`}</div>
+          </div>
+          ${isDone
+            ? '<button type="button" data-timer-action="dismiss" aria-label="Fermer">×</button>'
+            : `<button type="button" data-timer-action="pause" aria-label="Pause / reprendre">${pauseIcon}</button>
+               <button type="button" data-timer-action="skip" aria-label="Passer">×</button>`}
+        </div>
+      `;
+    }
+
+    function updateTimerDOM(exerciseName) {
+      const t = activeTimers.get(exerciseName);
+      const el = trackingEl.querySelector(`[data-timer="${CSS.escape(exerciseName)}"]`);
+      if (!el) return;
+      if (!t) { el.remove(); return; }
+      const display = el.querySelector('.timer-display');
+      if (display && t.remaining > 0) display.textContent = formatRemaining(t.remaining);
+    }
+
+    function startRestTimer(exerciseName, durationSec) {
+      const existing = activeTimers.get(exerciseName);
+      if (existing && existing.intervalId) clearInterval(existing.intervalId);
+      const state = { remaining: durationSec, total: durationSec, paused: false, intervalId: null, finished: false };
+      state.intervalId = setInterval(() => {
+        if (state.paused) return;
+        state.remaining -= 1;
+        if (state.remaining <= 0 && !state.finished) {
+          state.finished = true;
+          clearInterval(state.intervalId);
+          state.intervalId = null;
+          pingFinish();
+          const block = trackingEl.querySelector(`[data-exo-block="${CSS.escape(exerciseName)}"]`);
+          if (block) {
+            const oldTimer = block.querySelector('.rest-timer');
+            if (oldTimer) oldTimer.outerHTML = renderRestTimer(exerciseName);
+          }
+          return;
+        }
+        updateTimerDOM(exerciseName);
+      }, 1000);
+      activeTimers.set(exerciseName, state);
+      const block = trackingEl.querySelector(`[data-exo-block="${CSS.escape(exerciseName)}"]`);
+      if (!block) return;
+      const existingTimer = block.querySelector('.rest-timer');
+      if (existingTimer) {
+        existingTimer.outerHTML = renderRestTimer(exerciseName);
+      } else {
+        const form = block.querySelector('.log-form');
+        if (form) form.insertAdjacentHTML('afterend', renderRestTimer(exerciseName));
+      }
+    }
+
+    function pauseRestTimer(exerciseName) {
+      const t = activeTimers.get(exerciseName);
+      if (!t) return;
+      t.paused = !t.paused;
+      const block = trackingEl.querySelector(`[data-exo-block="${CSS.escape(exerciseName)}"]`);
+      if (block) {
+        const el = block.querySelector('.rest-timer');
+        if (el) el.outerHTML = renderRestTimer(exerciseName);
+      }
+    }
+
+    function stopRestTimer(exerciseName) {
+      const t = activeTimers.get(exerciseName);
+      if (t && t.intervalId) clearInterval(t.intervalId);
+      activeTimers.delete(exerciseName);
+      const block = trackingEl.querySelector(`[data-exo-block="${CSS.escape(exerciseName)}"]`);
+      if (block) {
+        const el = block.querySelector('.rest-timer');
+        if (el) el.remove();
+      }
+    }
+
+    function parseRepRange(repsStr) {
+      if (!repsStr) return null;
+      const range = String(repsStr).match(/(\d+)\s*-\s*(\d+)/);
+      if (range) return { min: parseInt(range[1], 10), max: parseInt(range[2], 10) };
+      const single = String(repsStr).match(/(\d+)/);
+      if (single) { const n = parseInt(single[1], 10); return { min: n, max: n }; }
+      return null;
+    }
+
+    function detectPlateau(history, prs) {
+      if (history.length < 4) return null;
+      const recent = prs.slice(0, 3);
+      if (recent.every(p => p && !p.anyPR)) {
+        return { duration: 3, hint: 'Pas de record sur les 3 dernières séances. Varie : charge, tempo lent, pause en bas, ou variante plus difficile.' };
+      }
+      return null;
+    }
+
+    function isFixedLoad(equipment, weightProfile) {
+      if (equipment === 'bodyweight') return true;
+      if ((equipment === 'kettlebell' || equipment === 'dumbbells') && !weightProfile.multiple) return true;
+      return false;
+    }
+
+    function equipmentStep(equipment) {
+      if (equipment === 'gym') return 2.5;
+      if (equipment === 'dumbbells') return 2;
+      if (equipment === 'kettlebell') return 4;
+      return 0;
+    }
+
+    function roundToStep(value, step) {
+      if (!step) return value;
+      return Math.round(value / step) * step;
+    }
+
+    function formatWeight(n) {
+      if (!isFinite(n)) return '';
+      return Number.isInteger(n) ? String(n) : n.toFixed(1).replace(/\.0$/, '');
+    }
+
+    function buildRepsString(repsArray) {
+      return repsArray.map(r => Math.max(0, Math.round(r))).join(',');
+    }
+
+    function computeSuggestion(ex, history, equipment, weightProfile, cycleInfo) {
+      if (!history.length) return null;
+      const last = history[0];
+      const lastMetric = computeMetric(last);
+      const lastRPE = last.rpe != null ? Number(last.rpe) : null;
+      const range = parseRepRange(ex.reps) || { min: 8, max: 10 };
+      const lastReps = (last.reps || '').split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      if (!lastReps.length) return null;
+      const atTopOfRange = lastReps.every(r => r >= range.max);
+      const fixed = isFixedLoad(equipment, weightProfile);
+      const step = equipmentStep(equipment);
+      const week = cycleInfo && cycleInfo.active ? cycleInfo.week : 1;
+      const isDeload = week === 5;
+
+      let sets = last.sets, reps = '', weight = '', rationale = '', mode = 'normal';
+
+      if (isDeload) {
+        mode = 'deload';
+        if (lastMetric.weight > 0 && !fixed) {
+          weight = formatWeight(roundToStep(lastMetric.weight * 0.65, step));
+          reps = buildRepsString(lastReps.map(() => Math.max(range.min, Math.floor(range.min * 0.9))));
+          rationale = `Semaine 5 (deload) : charge ~65 %, reps bas de fourchette. Pas de proximité à l’échec.`;
+        } else {
+          weight = last.weight || '';
+          reps = buildRepsString(lastReps.map(r => Math.max(range.min, Math.floor(r * 0.65))));
+          rationale = `Semaine 5 (deload) : reps réduits d'environ 35 %, tempo propre, garde une marge nette.`;
+        }
+        return { sets, reps, weight, rationale, mode };
+      }
+
+      if (fixed) {
+        weight = last.weight || '';
+        if (atTopOfRange) {
+          reps = last.reps;
+          rationale = `Tu plafonnes la fourchette (${range.min}-${range.max}). Passe à une variante plus dure : tempo 3-1-1, pause de 2 s en bas, ou exercice plus exigeant (unilatéral, amplitude).`;
+        } else if (lastRPE != null && lastRPE <= 6) {
+          reps = buildRepsString(lastReps.map(r => Math.min(range.max, r + 2)));
+          rationale = `RPE ${lastRPE} la fois passée : grosse marge. Vise +2 reps par série.`;
+        } else if (lastRPE == null || lastRPE === 7) {
+          reps = buildRepsString(lastReps.map(r => Math.min(range.max, r + 2)));
+          rationale = lastRPE == null
+            ? `Pas de RPE noté : on suppose une bonne marge, vise +2 reps par série.`
+            : `RPE 7 : encore de la marge, vise +2 reps par série.`;
+        } else if (lastRPE === 8) {
+          reps = buildRepsString(lastReps.map(r => Math.min(range.max, r + 1)));
+          rationale = `RPE 8 : progression standard, +1 rep par série.`;
+        } else if (lastRPE === 9) {
+          reps = buildRepsString(lastReps.map((r, i) => i === 0 ? Math.min(range.max, r + 1) : r));
+          rationale = `RPE 9 : à la limite. +1 rep sur la 1ère série seulement, ou ralentis l'excentrique (3 s descente).`;
+        } else { // RPE 10
+          reps = last.reps;
+          rationale = `RPE 10 = échec : maintiens reps, ajoute 1-2 s de pause en bas ou ralentis fortement la descente.`;
+        }
+        return { sets, reps, weight, rationale, mode };
+      }
+
+      const currentW = lastMetric.weight;
+      if (currentW === 0) {
+        reps = last.reps;
+        weight = '';
+        rationale = `Note ta charge pour obtenir une suggestion précise.`;
+        return { sets, reps, weight, rationale, mode };
+      }
+
+      if (lastRPE != null && lastRPE <= 6) {
+        weight = formatWeight(currentW + step * 2);
+        reps = last.reps;
+        rationale = `RPE ${lastRPE} : marge importante, +${formatWeight(step * 2)} kg à reps égaux.`;
+      } else if (lastRPE == null || lastRPE === 7) {
+        weight = formatWeight(currentW + step);
+        reps = last.reps;
+        rationale = lastRPE == null
+          ? `Pas de RPE noté : on tente +${formatWeight(step)} kg, ajuste selon ressenti.`
+          : `RPE 7 : +${formatWeight(step)} kg à reps égaux.`;
+      } else if (lastRPE === 8) {
+        if (atTopOfRange) {
+          weight = formatWeight(currentW + step);
+          reps = buildRepsString(lastReps.map(() => range.min));
+          rationale = `Top de fourchette + RPE 8 : +${formatWeight(step)} kg, redescends en bas de fourchette (${range.min} reps).`;
+        } else {
+          weight = formatWeight(currentW);
+          reps = buildRepsString(lastReps.map(r => Math.min(range.max, r + 1)));
+          rationale = `RPE 8 : même charge, +1 rep par série.`;
+        }
+      } else if (lastRPE === 9) {
+        weight = formatWeight(currentW);
+        reps = last.reps;
+        rationale = `RPE 9 : maintiens la performance, consolide avant de monter.`;
+      } else { // RPE 10
+        weight = formatWeight(Math.max(0, currentW - step));
+        reps = last.reps;
+        rationale = `RPE 10 = échec : -${formatWeight(step)} kg pour rester ~RPE 8.`;
+      }
+      return { sets, reps, weight, rationale, mode };
+    }
+
+    function renderSuggestionPanel(suggestion) {
+      if (!suggestion) return '';
+      const summary = [
+        `${suggestion.sets} × ${suggestion.reps}`,
+        suggestion.weight ? `@ ${suggestion.weight} kg` : ''
+      ].filter(Boolean).join(' ');
+      const dataAttr = `data-suggest-sets="${escapeHtml(String(suggestion.sets))}" data-suggest-reps="${escapeHtml(suggestion.reps)}" data-suggest-weight="${escapeHtml(suggestion.weight)}"`;
+      return `
+        <div class="suggestion-panel ${suggestion.mode === 'deload' ? 'deload' : ''}">
+          <div class="suggestion-icon">${suggestion.mode === 'deload' ? '🛌' : '💡'}</div>
+          <div class="suggestion-body">
+            <strong>Suggestion : ${escapeHtml(summary)}</strong>
+            <small>${escapeHtml(suggestion.rationale)}</small>
+          </div>
+          <button type="button" class="suggestion-apply" ${dataAttr}>Appliquer</button>
+        </div>
+      `;
+    }
+
+    function computeMetric(entry) {
+      const reps = (entry.reps || '').split(',').map(s => parseFloat(s.trim()) || 0);
+      const totalReps = reps.reduce((a, b) => a + b, 0);
+      const weight = parseFloat(entry.weight) || 0;
+      return { totalReps, weight, volume: weight * totalReps };
+    }
+
+    function computePRsForHistory(history) {
+      const chrono = [...history].reverse();
+      let maxW = 0, maxR = 0, maxV = 0;
+      const prChrono = chrono.map((e, i) => {
+        const m = computeMetric(e);
+        const flags = i === 0
+          ? { weight: false, reps: false, volume: false, anyPR: false }
+          : {
+              weight: m.weight > 0 && m.weight > maxW,
+              reps: m.totalReps > 0 && m.totalReps > maxR,
+              volume: m.volume > 0 && m.volume > maxV,
+              anyPR: false
+            };
+        flags.anyPR = flags.weight || flags.reps || flags.volume;
+        if (m.weight > maxW) maxW = m.weight;
+        if (m.totalReps > maxR) maxR = m.totalReps;
+        if (m.volume > maxV) maxV = m.volume;
+        return flags;
+      });
+      return prChrono.reverse();
+    }
+
+    function renderMiniChart(history, prs) {
+      if (history.length < 2) return '';
+      const chrono = [...history].reverse();
+      const chronoPRs = [...prs].reverse();
+      const metrics = chrono.map(computeMetric);
+      const hasWeight = metrics.some(m => m.weight > 0);
+      const series = hasWeight ? metrics.map(m => m.volume) : metrics.map(m => m.totalReps);
+      const label = hasWeight ? 'Volume (kg × reps)' : 'Reps totales';
+      const firstV = series[0], lastV = series[series.length - 1];
+      const diff = lastV - firstV;
+      const trendArrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+      const trendClass = diff > 0 ? '' : diff < 0 ? 'down' : 'flat';
+      const trendText = diff !== 0
+        ? `${trendArrow} ${firstV.toFixed(0)} → ${lastV.toFixed(0)}`
+        : `→ stable à ${lastV.toFixed(0)}`;
+      const min = Math.min(...series);
+      const max = Math.max(...series);
+      const range = max - min;
+      const W = 280, H = 50, padX = 8, padY = 6;
+      const innerW = W - 2 * padX, innerH = H - 2 * padY;
+      const points = series.map((v, i) => {
+        const x = padX + (i / Math.max(1, series.length - 1)) * innerW;
+        const y = range === 0
+          ? padY + innerH / 2
+          : padY + innerH - ((v - min) / range) * innerH;
+        return { x, y, pr: chronoPRs[i].anyPR };
+      });
+      const polyline = points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+      const dots = points.map(p => `<circle class="dot ${p.pr ? 'pr' : ''}" cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${p.pr ? 3.5 : 2.5}"/>`).join('');
+      return `
+        <div class="mini-chart">
+          <div class="mini-chart-head">
+            <span class="label">${label}</span>
+            <span class="trend ${trendClass}">${trendText}</span>
+          </div>
+          <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">
+            <polyline class="line" points="${polyline}"/>
+            ${dots}
+          </svg>
+        </div>
+      `;
+    }
+
+    function renderExerciseBlock(ex, logs, today) {
+      const history = logs[ex.name] || [];
+      const prs = computePRsForHistory(history);
+      const last = history[0] || null;
+      const prefillSets = last ? escapeHtml(String(last.sets)) : '';
+      const prefillReps = last ? escapeHtml(last.reps || '') : '';
+      const prefillWeight = last ? escapeHtml(String(last.weight || '')) : '';
+      const prefillRpe = last && last.rpe != null ? String(last.rpe) : '';
+      const cycleInfo = getCycleInfo();
+      const suggestion = computeSuggestion(ex, history, state.equipment, lastWeightProfile, cycleInfo);
+      const plateau = detectPlateau(history, prs);
+      const plateauBadge = plateau ? ` <span class="plateau-badge" title="${escapeHtml(plateau.hint)}">⚠️ plateau</span>` : '';
+      return `
+        <div class="tracking-exo" data-exo-block="${escapeHtml(ex.name)}">
+          <div class="tracking-exo-name">
+            <span>${escapeHtml(ex.name)}${plateauBadge}</span>
+            <span class="prescription">Prescrit : ${ex.sets} × ${ex.reps} · repos ${ex.rest}</span>
+          </div>
+          ${renderSuggestionPanel(suggestion)}
+          <form class="log-form" data-exercise="${escapeHtml(ex.name)}">
+            <div class="field-mini"><label>Date</label><input type="date" name="date" value="${today}" required></div>
+            <div class="field-mini"><label>Séries</label><input type="number" name="sets" min="1" max="20" value="${prefillSets}" placeholder="${ex.sets}" required></div>
+            <div class="field-mini"><label>Reps (ex: 8,8,7)</label><input type="text" name="reps" value="${prefillReps}" placeholder="${ex.reps}" required></div>
+            <div class="field-mini"><label>Poids (kg)</label><input type="text" name="weight" value="${prefillWeight}" placeholder="—"></div>
+            <div class="field-mini"><label>RPE (1-10)</label><input type="number" name="rpe" min="1" max="10" step="0.5" value="${prefillRpe}" placeholder="8"></div>
+            <button type="submit" class="btn-log">Ajouter</button>
+          </form>
+          ${renderRestTimer(ex.name)}
+          ${renderMiniChart(history, prs)}
+          ${plateau ? `<div class="inline-note">${escapeHtml(plateau.hint)}</div>` : ''}
+          <div class="log-history">${renderHistoryEntries(ex.name, history, prs)}</div>
+        </div>
+      `;
+    }
+
+    function renderHistoryEntries(exerciseName, history, prs) {
+      if (!history.length) return '<div class="log-history-empty">Aucune entrée pour l’instant.</div>';
+      return history.map((entry, idx) => {
+        const pr = (prs && prs[idx]) || { weight: false, reps: false, volume: false };
+        const prTags = [];
+        if (pr.weight) prTags.push('charge');
+        if (pr.reps) prTags.push('reps');
+        if (pr.volume) prTags.push('vol.');
+        const prBadge = prTags.length ? `<span class="pr-badge">🏆 ${prTags.join(' · ')}</span>` : '';
+        return `
+          <div class="log-entry">
+            <span class="log-date">${formatDateFR(entry.date)}</span>
+            <span class="log-stats">
+              ${entry.sets} × ${escapeHtml(entry.reps)}${entry.weight ? ' @ ' + escapeHtml(entry.weight) + ' kg' : ''}
+              ${entry.rpe ? `<span class="rpe">RPE ${entry.rpe}</span>` : ''}
+              ${prBadge}
+              ${entry.note ? `<span class="note">${escapeHtml(entry.note)}</span>` : ''}
+            </span>
+            <button type="button" class="btn-del" data-exercise="${escapeHtml(exerciseName)}" data-idx="${idx}" aria-label="Supprimer">×</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function reRenderExerciseBlock(exerciseName) {
+      const block = trackingEl.querySelector(`[data-exo-block="${CSS.escape(exerciseName)}"]`);
+      if (!block) return;
+      const ex = lastGeneratedSessions.flatMap(s => s.exercises).find(e => e.name === exerciseName);
+      if (!ex) return;
+      const logs = loadLogs();
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = renderExerciseBlock(ex, logs, todayISO()).trim();
+      block.replaceWith(wrapper.firstChild);
+    }
+
+    function renderTracking(sessions) {
+      activeTimers.forEach((t) => { if (t.intervalId) clearInterval(t.intervalId); });
+      activeTimers.clear();
+      lastGeneratedSessions = sessions;
+      const logs = loadLogs();
+      const today = todayISO();
+      trackingEl.innerHTML = `
+        <h3 class="day-title" style="margin-bottom:var(--space-2);">Suivi des séances</h3>
+        <p class="section-subtitle" style="margin-bottom:var(--space-4);">Note ce que tu as fait à chaque séance pour suivre ta progression. Le formulaire est pré-rempli avec ta dernière entrée et les records sont signalés automatiquement.</p>
+        ${sessions.map((session, sIdx) => `
+          <details ${sIdx === 0 ? 'open' : ''}>
+            <summary><span>${session.name} — ${session.focus}</span><span class="badge">${session.badge}</span></summary>
+            <div class="tracking-body">
+              ${renderSessionNotes(session.name)}
+              ${session.exercises.map(ex => renderExerciseBlock(ex, logs, today)).join('')}
+            </div>
+          </details>
+        `).join('')}
+      `;
+    }
+
+    let trackingDelegationBound = false;
+    function bindTrackingDelegation() {
+      if (trackingDelegationBound) return;
+      trackingDelegationBound = true;
+      trackingEl.addEventListener('submit', (e) => {
+        const notesForm = e.target.closest('.session-notes-form');
+        if (notesForm) {
+          e.preventDefault();
+          const sessionName = notesForm.dataset.session;
+          const data = new FormData(notesForm);
+          upsertSessionNote(sessionName, data.get('date'), data.get('text'));
+          reRenderSessionNotes(sessionName);
+          renderCycleBanner();
+          return;
+        }
+        const form = e.target.closest('.log-form');
+        if (!form) return;
+        e.preventDefault();
+        const exerciseName = form.dataset.exercise;
+        const data = new FormData(form);
+        const entry = {
+          date: data.get('date'),
+          sets: Number(data.get('sets')),
+          reps: data.get('reps').trim(),
+          weight: data.get('weight').trim(),
+          rpe: data.get('rpe') ? Number(data.get('rpe')) : null
+        };
+        addLogEntry(exerciseName, entry);
+        reRenderExerciseBlock(exerciseName);
+        const exDef = lastGeneratedSessions.flatMap(s => s.exercises).find(x => x.name === exerciseName);
+        if (exDef) startRestTimer(exerciseName, parseRestSeconds(exDef.rest));
+        renderCycleBanner();
+      });
+      trackingEl.addEventListener('click', (e) => {
+        const applyBtn = e.target.closest('.suggestion-apply');
+        if (applyBtn) {
+          const block = applyBtn.closest('[data-exo-block]');
+          if (!block) return;
+          const form = block.querySelector('.log-form');
+          if (!form) return;
+          if (applyBtn.dataset.suggestSets) form.querySelector('[name="sets"]').value = applyBtn.dataset.suggestSets;
+          if (applyBtn.dataset.suggestReps !== undefined) form.querySelector('[name="reps"]').value = applyBtn.dataset.suggestReps;
+          if (applyBtn.dataset.suggestWeight !== undefined) form.querySelector('[name="weight"]').value = applyBtn.dataset.suggestWeight;
+          form.querySelector('[name="reps"]').focus();
+          return;
+        }
+        const timerBtn = e.target.closest('[data-timer-action]');
+        if (timerBtn) {
+          const timerEl = timerBtn.closest('[data-timer]');
+          const exerciseName = timerEl && timerEl.dataset.timer;
+          if (!exerciseName) return;
+          const action = timerBtn.dataset.timerAction;
+          if (action === 'pause') pauseRestTimer(exerciseName);
+          else if (action === 'skip' || action === 'dismiss') stopRestTimer(exerciseName);
+          return;
+        }
+        const noteDelBtn = e.target.closest('[data-note-session]');
+        if (noteDelBtn) {
+          deleteSessionNote(noteDelBtn.dataset.noteSession, Number(noteDelBtn.dataset.noteIdx));
+          reRenderSessionNotes(noteDelBtn.dataset.noteSession);
+          renderCycleBanner();
+          return;
+        }
+        const delBtn = e.target.closest('.btn-del');
+        if (delBtn && delBtn.dataset.exercise && delBtn.dataset.idx !== undefined) {
+          deleteLogEntry(delBtn.dataset.exercise, Number(delBtn.dataset.idx));
+          reRenderExerciseBlock(delBtn.dataset.exercise);
+          renderCycleBanner();
+        }
+      });
+    }
+
+    function renderNotes(days, level, equipment, weightProfile) {
+      const cfg = levelConfig[level];
+      const extra = days >= 5 ? 'Avec 5 à 6 séances, garde au moins une journée plus légère ou une marge sur les accessoires pour mieux récupérer.' : 'Avec 2 à 4 séances, concentre-toi sur la régularité et évite de rajouter trop de volume annexe.';
+      const loadSpecific = equipment === 'kettlebell'
+        ? `Kettlebell: ${weightProfile.note}`
+        : equipment === 'dumbbells'
+          ? `Haltères: ${weightProfile.note}`
+          : 'Si la charge devient facile, augmente d’abord la difficulté de l’exercice avant d’ajouter trop de volume.';
+      notesEl.innerHTML = `
+        <h3 class="day-title" style="margin-bottom:var(--space-4);">Consignes d’utilisation</h3>
+        <div class="note-list">
+          <div>Échauffement: 5 à 8 min de cardio léger puis 2 à 4 séries de montée en charge sur le premier mouvement.</div>
+          <div>Règle simple: quand tu atteins le haut de la fourchette de répétitions sur toutes les séries, augmente la charge ou passe à une variante plus difficile la semaine suivante.</div>
+          <div>Niveau ${cfg.label.toLowerCase()}: vise globalement ${cfg.weeklySetsRange}.</div>
+          <div>${extra}</div>
+          <div>${loadSpecific}</div>
+          <div>Douleur articulaire inhabituelle, fatigue excessive ou baisse nette de performance: réduis une série par exercice principal pendant 1 semaine.</div>
+        </div>
+      `;
+    }
+
+    function updateWeightFieldVisibility() {
+      const equipment = equipmentEl.value;
+      const relevant = equipment === 'kettlebell' || equipment === 'dumbbells' || equipment === 'gym';
+      document.getElementById('weightField').classList.toggle('hidden', !relevant);
+      kbListField.classList.toggle('hidden', equipment !== 'kettlebell');
+      if (equipment === 'kettlebell') weightHintEl.textContent = 'Indique si tu as une seule kettlebell ou plusieurs, puis liste les poids pour adapter la progression.';
+      else if (equipment === 'dumbbells') weightHintEl.textContent = 'Choisis la charge d’haltères principale disponible pour mieux adapter les répétitions et variantes.';
+      else if (equipment === 'gym') weightHintEl.textContent = 'Tu peux laisser “à préciser” si tu as accès à une salle complète.';
+    }
+
+    function updateWeightNote(weightProfile) {
+      const show = state.equipment === 'kettlebell' || state.equipment === 'dumbbells';
+      weightNoteEl.classList.toggle('hidden', !show);
+      if (show) weightNoteEl.textContent = weightProfile.note;
+    }
+
+    function generateProgram() {
+      state.days = Number(daysEl.value);
+      state.equipment = equipmentEl.value;
+      state.level = levelEl.value;
+      state.availableWeights = availableWeightsEl.value;
+      const weightProfile = getWeightProfile(state.equipment, state.availableWeights, kbListEl.value.trim());
+      lastWeightProfile = weightProfile;
+      const sessions = buildSessions(state.days, state.equipment, state.level, weightProfile);
+      renderSummary(state.days, state.equipment, state.level, sessions, weightProfile);
+      renderProgram(state.days, state.equipment, sessions);
+      renderProgression(state.level, state.equipment, weightProfile);
+      renderNotes(state.days, state.level, state.equipment, weightProfile);
+      renderTracking(sessions);
+      renderCycleBanner();
+      updateWeightNote(weightProfile);
+      heroTextEl.textContent = `Programme généré pour ${state.days} séance(s) par semaine, matériel: ${equipmentLabels[state.equipment]}, charge accessible: ${weightProfile.label}, niveau ${levelConfig[state.level].label.toLowerCase()}. Le planning alterne stimulus et récupération avec une logique de progression sur huit semaines.`;
+    }
+
+    document.getElementById('generateBtn').addEventListener('click', generateProgram);
+    document.getElementById('printBtn').addEventListener('click', () => window.print());
+    equipmentEl.addEventListener('change', () => { updateWeightFieldVisibility(); generateProgram(); });
+    availableWeightsEl.addEventListener('change', () => { updateWeightFieldVisibility(); generateProgram(); });
+    kbListEl.addEventListener('input', generateProgram);
+    daysEl.addEventListener('change', generateProgram);
+    levelEl.addEventListener('change', generateProgram);
+
+    (function(){
+      const t = document.querySelector('[data-theme-toggle]');
+      const r = document.documentElement;
+      let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+      r.setAttribute('data-theme', d);
+      const renderIcon = () => {
+        t.innerHTML = d === 'dark'
+          ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+          : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      };
+      renderIcon();
+      t.addEventListener('click', () => { d = d === 'dark' ? 'light' : 'dark'; r.setAttribute('data-theme', d); renderIcon(); });
+    })();
+
+    (async function init() {
+      bindTrackingDelegation();
+      await initBackup();
+      renderBackupBar();
+      updateWeightFieldVisibility();
+      generateProgram();
+    })();
+  </script>
+</body>
+</html>
